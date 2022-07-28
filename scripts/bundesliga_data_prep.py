@@ -10,7 +10,6 @@ wyscout_data = PublicWyscoutLoader()
 # Germany 17/18, competition_id = 426, season_id = 181137
 bundesliga_games = wyscout_data.games(competition_id = 426, season_id = 181137)["game_id"]
 
-
 # download all bundesliga matches and save as a single .csv
 events = pd.DataFrame()
 for i in bundesliga_games:
@@ -20,7 +19,7 @@ for i in bundesliga_games:
 # save as .csv file
 events.to_csv('data/bundesliga/events.csv', index = False)    
 
-# upload 'events' dataframe that includes all events of all 380 Bundesliga games
+# upload 'events' dataframe that includes all events of all 340 Bundesliga games
 df = pd.read_csv('data/bundesliga/events.csv')
 
 # remove columns 'event id' and 'milliseconds'
