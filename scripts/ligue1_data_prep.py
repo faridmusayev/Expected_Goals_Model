@@ -41,7 +41,7 @@ df['y_start'] = df['positions'].apply(lambda x: x[0]['y'])
 df['x_end'] = df['positions'].apply(lambda x: x[1]['x'] if len(x) == 2 else np.nan)
 df['y_end'] = df['positions'].apply(lambda x: x[1]['y'] if len(x) == 2  else np.nan)
 
-# import tags for encode subevents in event data
+# import tags
 tags = pd.read_csv('data/wyscout_tags.csv', sep = ';')
 
 # make all descriptions lowercase
@@ -54,7 +54,7 @@ tags = dict(zip(tags['Tag'], tags['Description']))
 df['tag_id'] = df['tags'].apply(lambda x: [value for d in x for value in d.values()])
 df['tag_name'] = df['tag_id'].apply(lambda x: [tags[i] for i in x])
 
-# drop redundant column 'positions'
+# drop redundant columns: 'positions', 'tags'
 df.drop(columns = ['positions', 'tags'], inplace = True)
 
 # rearrange columns using only required indices and passing them into np.r_
@@ -64,8 +64,8 @@ df = df.iloc[:, rearr_cols]
 # save 'df' as 'refined_events.csv' dataframe
 df.to_csv('data/ligue1/refined_events.csv', index = False)
 
-# free kicks are not included (penalties are also part of free kicks)
+# filter out all shot events for xG Model
 shots = df[df['type_name'] == 'shot']
 
-# save 'df' as 'refined_events.csv' dataframe
+# save 'shots' dataframe as .csv file
 shots.to_csv('data/ligue1/shots.csv', index = False)    
