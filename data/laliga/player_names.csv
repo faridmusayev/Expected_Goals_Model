@@ -1,0 +1,558 @@
+player_id,nickname
+33,J. Cillessen
+99,P. Tytoń
+151,J. Guidetti
+254,R. Rosales
+786,R. Mazáň
+1751,O. Tannane
+3267,Guaita
+3269,Jordi Alba
+3270,Barragán
+3277,Víctor Ruíz
+3280,É. Banega
+3282,Canales
+3286,Dani Parejo
+3287,Portu
+3290,Aduriz
+3291,Paco Alcácer
+3293,P. Piatti
+3296,Adán
+3299,Fernando Pacheco
+3304,Nacho
+3306,Sergio Ramos
+3309,R. Varane
+3310,Marcelo
+3317,Granero
+3321,K. Benzema
+3322,Cristiano Ronaldo
+3325,Juanfran
+3330,Oier
+3335,Bartra
+3337,Fontàs
+3338,Sergi Gómez
+3339,Montoya
+3340,Muniesa
+3341,Piqué
+3346,Sergio Busquets
+3347,Sergi Roberto
+3348,Deulofeu
+3353,Iniesta
+3355,J. Mascherano
+3358,Cristian Tello
+3359,L. Messi
+3372,Aythami Artiles
+3384,A. Guardado
+3394,Bruno Gama
+3397,Arrizabalaga
+3398,Raúl Fernández
+3399,Iraizoz
+3407,Ramalho
+3408,Saborit
+3409,San José
+3414,Iturraspe
+3420,Susaeta
+3421,De Marcos
+3423,Ibai Gómez
+3425,Muniain
+3428,Sergio Asenjo
+3433,D. Godín
+3434,Filipe Luis
+3441,Gabi
+3443,Koke
+3447,Juanfran
+3451,Adrián López
+3458,Sergio Rico
+3460,Coke
+3464,Luna
+3465,Fernando Navarro
+3466,Alexis
+3468,Juan Cala
+3470,Campaña
+3474,Jesús Navas
+3476,I. Rakitić
+3486,Andrés Fernández
+3488,Asier Riesgo
+3496,Sergio Postigo
+3503,Raúl García
+3510,Timor
+3519,Diego López
+3529,Mario
+3534,Jaume Costa
+3538,M. Wakaso
+3539,H. Pérez
+3542,Trigueros
+3554,Rubén
+3562,Sergio Sánchez
+3563,Isco
+3568,Recio
+3571,Joaquín
+3572,Portillo
+3576,Juanmi
+3595,Beñat
+3599,J. Montero
+3604,Rubén Castro
+3605,Jorge Molina
+3642,Ramis
+3644,Bigas
+3645,Chory Castro
+3650,Tomás Pina
+3663,Toño
+3667,De La Bella
+3671,Íñigo Martínez
+3672,Carlos Martínez
+3674,Markel Bergara
+3676,Illarramendi
+3677,Rubén Pardo
+3678,Xabi Prieto
+3680,Zurutuza
+3681,Agirretxe
+3682,A. Griezmann
+3685,C. Vela
+3692,Bernardo Espinosa
+3695,Álvaro González
+3704,P. Diop
+3705,Adrián
+3708,Jairo Samperio
+3714,C. Stuani
+3719,Roberto
+3735,Juankar
+3750,Balenziaga
+3779,Bueno
+3785,Kiko Casilla
+3788,Jordi Amat
+3791,Z. Feddal
+3795,H. Moreno
+3797,Víctor Sánchez
+3798,Dídac Vilá
+3802,Philippe Coutinho
+3803,Sergi Darder
+3806,Javi López
+3816,Sergio García
+3821,Sergio Álvarez
+3822,Rubén Blanco
+3823,Yoel
+3827,Hugo Mallo
+3828,Raúl Navas
+3840,Iago Aspas
+3843,F. Orellana
+3856,Molinero
+3866,M. Iturra
+3874,Kike García
+3875,Borja Bastón
+3885,L. Cabrera
+3915,K. Navas
+3916,G. Cabral
+3919,Iván López
+3920,Pedro López
+3934,N. El Zhar
+3937,Roger
+3963,Cuéllar
+3970,Gálvez
+3974,D. Suárez
+3994,Moyà
+4003,Miguel Torres
+4009,M. Lacen
+4013,Rubén Pérez
+4014,Pedro León
+4015,Pablo Sarabia
+4048,Sergi Enrich
+4065,J. Murillo
+4086,Bóveda
+4094,Ander Capa
+4113,Etxeita
+4131,Ángel
+4180,Lombán
+4232,Pedro Alcalá
+4238,Míchel
+4256,Aleix Vidal
+4272,Ximo Navarro
+4278,Borja García
+4303,David López
+4319,Dani Giménez
+4326,Tito
+4329,A. Arribas
+4332,Javi Fuego
+4338,Diego Costa
+4343,Dani Pacheco
+4348,M. Barbosa
+4350,Raúl Lizoáin
+4355,David García
+4358,Laguardia
+4360,Juanpe
+4361,Javi Castellano
+4362,Momo
+4363,Vicente Gómez
+4365,Roque Mesa
+4366,Hernán
+4371,Dani Castellano
+4375,Vitolo
+4379,Jonathan Viera
+4424,Jonny
+4440,Borja Valle
+4476,Iago Herrerín
+4488,Saúl
+4498,Lucas Vázquez
+4501,Daniel Carvajal
+4511,Pedro Mosquera
+4513,D. Cheryshev
+4593,Sergio Mora
+4683,A. Szymanowski
+4780,David Juncà
+4789,Carles Planas
+4805,Arbilla
+4879,Carles Gil
+4892,José Gayá
+4911,Jozabed
+4936,David Simón
+4969,Tana
+5147,Choco Lozano
+5195,Omar Ramos
+5268,Sergio León
+5290,Mikel Rico
+5327,Miguel Cifuentes
+5383,Toño
+5400,Gerard Moreno
+5472,Luis Hernández
+5481,Guerrero
+5542,Dani García
+5653,M. Mantovani
+5677,Bruno
+5791,Juanpi
+5907,Sergi Samper
+5911,Sandro
+6165,F. Andone
+6210,Aday
+6281,Zaldúa
+6363,Serantes
+6365,Bustinza
+6370,Eraso
+6513,Raúl García
+6577,Pedro López
+6684,Jony
+6914,Álex Alegría
+6925,Héctor
+7302,Albentosa
+7585,Manu García
+7623,Léo Baptistão
+7848,E. Martínez
+7857,Miquel
+7860,T. Vermaelen
+7864,F. Coquelin
+7908,Fernando Torres
+7972,L. Suárez
+8200,S. N'Zonzi
+8213,Rubén Rochina
+8278,G. Bale
+8287,L. Modrić
+8303,C. Pantilimon
+8311,S. Savić
+8323,Denis Suárez
+14723,T. Kroos
+14757,Z. Kuzmanović
+14836,T. Inui
+14852,Sergio Escudero
+14866,Jurado
+15008,M. ter Stegen
+15214,A. Rukavina
+15455,J. Geis
+20393,D. Bonera
+20401,A. Aquilani
+20406,M. Flamini
+20410,S. Muntari
+20433,S. Kjær
+20436,José Ángel
+20450,Bojan
+20536,G. Pazzini
+20623,R. Soriano
+20764,L. Muriel
+20803,M. Aguirregaray
+20808,E. Muñoz
+20823,F. Vázquez
+20922,Neto
+21894,Keko
+22202,S. Zaza
+22578,N. Sansone
+25397,S. Umtiti
+25445,K. Gameiro
+25452,S. Corchia
+25461,R. Boudebouz
+25472,C. Bakambu
+25577,L. Rémy
+25623,G. Kondogbia
+25701,L. Digne
+25795,W. Ben Yedder
+25888,F. Fajr
+26032,C. Doukouré
+26038,J. Campbell
+26084,L. Carole
+26167,C. Beauvue
+26307,A. Mandi
+26332,P. Baysse
+26518,C. Sánchez
+26652,D. Wass
+29642,G. Peñalba
+32577,Sidnei
+32601,Bebé
+32652,E. Çolak
+32793,A. N'Diaye
+32968,N. Amrabat
+37831,C. Bacca
+37836,M. Lestienne
+38094,I. Ezekiel
+38436,C. Santos
+40550,Paulinho
+40614,Guilherme
+40756,Casemiro
+40770,Willian José
+40800,Ganso
+41124,Naldo
+41363,Gabriel
+43051,Gabriel
+50102,F. Schär
+50272,O. Kayode
+50461,A. Sadiku
+51004,C. Borges
+56009,R. Durmisi
+56025,M. Krohn-Dehli
+69404,M. Kovačić
+69409,Š. Vrsaljko
+70112,E. Garay
+70120,Javi García
+70121,N. Gaitán
+70125,Nolito
+70129,Rodrigo
+70140,Daniel Carriço
+70273,J. Oblak
+70451,Luisinho
+70507,Paulo Oliveira
+70956,Rúben Semedo
+85113,A. Toșca
+86183,F. Roncaglia
+86200,S. Araújo
+86212,G. Rulli
+86220,G. Mercado
+86307,L. Vietto
+86319,L. Chichizola
+86350,N. Champagne
+86623,A. Fernández
+86716,M. Dos Santos
+86828,G. Pizarro
+91064,D. Torres
+91122,J. Narváez
+91702,J. Mojica
+93000,Antunes
+93003,D. Siovas
+94828,G. Shibasaki
+101649,N. Pareja
+105541,Lucas Pérez
+105587,M. Koval
+105616,B. Ideye
+112366,M. Layún
+114055,Óscar Romero
+116283,D. Rolán
+120631,Y. Bounou
+122623,Fahad Al Muwallad
+122832,Salem Al Dawsari
+125250,Ó. Duarte
+127719,A. Katai
+127928,D. Brašanac
+134174,Samu Castillejo
+134249,Rubén Sobrino
+134502,A. Laporte
+134503,C. Lenglet
+134769,Y. Carrasco
+135113,A. Hjulsager
+135903,João Cancelo
+140046,M. Dmitrović
+140125,N. Radoja
+167104,Eloi Amagat
+167117,Ager Aketxe
+167118,Erik Morán
+167119,Sabin Merino
+167641,S. Lobotka
+169002,Diego Rico
+207001,J. Correa
+208694,Rodrigo Ely
+209012,Kévin Rodrigues
+211853,Rúben Vezo
+211885,André Gomes
+212644,G. Escalante
+213124,Chema
+214062,Álex Granell
+215265,Jaume
+217031,Thomas
+222324,A. Werner
+222770,Nélson Semedo
+224080,G. Maripán
+225022,Rubén Duarte
+225089,José Luis Morales
+225946,A. Sanabria
+225948,Rubén Peña
+225996,Diego Llorente
+226005,Burgui
+227894,J. Giménez
+228902,J. Calleri
+230857,Yeray
+230862,Lekue
+230895,Pere Pons
+230897,Fede Cartabia
+234527,A. Halilović
+237034,Gonçalo Guedes
+237269,S. Lukić
+239843,Z. Bakkali
+240445,Andreas Pereira
+241945,P. Sisto
+247141,Iñaki Williams
+247150,One
+247169,Diego González
+247173,Andrés
+247206,Pau López
+247207,Joan Jordán
+247212,Rafa Navarro
+247219,Víctor Camarasa
+247220,Jason
+247222,Medrán
+250805,Djené
+250885,Santi Mina
+250899,Carlos Vigaray
+253551,W. Montoya
+254188,Matías Nahuel
+254189,Ivi
+254408,Á. Correa
+255738,J. Lerma
+256634,Y. Mina
+256854,L. Suárez
+257006,Mario González
+257752,M. Moreno
+259524,S. Moore
+259946,A. Peñaranda
+261127,A. Januzaj
+263091,Gumbau
+263092,Borja Lasso
+263105,Pablo Maffeo
+264778,M. El Id
+265807,José Naranjo
+265864,N. Maksimović
+266312,E. Cecchini
+266885,M. Olunga
+267134,R. Martínez
+269060,P. Hernández
+274435,E. Ünal
+275293,Samu García
+275497,Gerard Valentín
+278007,F. Ricca
+278049,E. Cabaco
+278278,Munir
+278288,Aritz Elustondo
+278289,Odriozola
+278316,Koke
+278320,David Soria
+278324,Carlos Fernández
+278383,Álvaro Jiménez
+279533,Mario Hermoso
+279538,Marcos Llorente
+279541,E. Zidane
+279545,L. Hernández
+279555,Iván Alejo
+279556,A. Sané
+279560,Andoni Gorosabel
+279566,Jon Guridi
+279570,Imanol Sarriegi
+279571,Jon Bautista
+280383,E. Bardhi
+281255,E. Mor
+282438,Aarón
+282441,Jesús Vallejo
+282445,R. Guerra
+282448,Aleix García
+285491,F. Uzoho
+285509,I. Success
+286390,O. Dembélé
+286448,M. Arambarri
+286963,Vesga
+286981,Antonio Sivera
+286994,Adrián Marín
+287003,Benito Ramírez
+288091,Marco Asensio
+292991,M. Lemos
+293856,Dani Molina
+293857,Nano
+293862,Nacho Gil
+298385,Borja Herrera
+302542,Nacho Vidal
+302550,Brais Méndez
+326523,Dani Ceballos
+326535,Toni Lato
+329026,Carlos Calderón
+334817,L. Boyé
+336371,Guilherme Arana
+338201,E. Boateng
+339857,José Arnáiz
+341751,Marc Navarro
+341752,Marc Roca
+344065,Andoni López
+344068,Unai Núñez
+344075,Iñigo Córdoba
+344120,Borja Mayoral
+344132,T. Hernández
+344140,A. Ndiaye
+346195,Fabián
+352328,E. Demirović
+352748,Iván Rodríguez
+352985,L. Zidane
+355599,Mikel Oyarzabal
+357992,Aitor Ruibal
+359847,Alfonso Pedraza
+364005,F. Valverde
+364820,Loren Morón
+364850,J. Firpo
+364860,Rodri
+364870,Adrián Diéguez
+366374,K. Soni
+367391,Toni Moya
+372752,Carlos Soler
+372753,Francis Guerrero
+373713,Christian Rivera
+375771,M. Olivera
+376474,M. Ndockyt
+376565,A. Abeid
+385273,Charles
+388832,Julio Gracia
+390613,Xesc Regis
+393881,H. Toledo
+395114,Zubeldía
+395636,Maxi Gómez
+396475,A. Hakimi
+396484,Carlos Isaac
+396539,Jaime Sierra
+397303,Ferrán Torres
+399673,E. Rolón
+399676,Pablo Fornals
+400549,Pau Torres
+400558,Chuca
+400564,Darío Poveda
+404285,Víctor López
+405972,Alex Robles
+406460,Alberto Redondo
+408293,Javi Ontiveros
+410055,Rober
+412897,Dani Raba
+424624,O. Etebo
+443324,Douglas Luiz
+447821,Y. En-Nesyri
+450784,Óscar Melendo
+470756,Alberto López
+472489,Lara
+485383,Álex Mula
+485794,Sergio Arribas
+488750,Mozo
+489417,Erik Expósito
+489488,Martín
+499843,Edu Expósito
+500200,Miguel
+516397,Mujaid Sadick
+519496,Fabio González
+520163,Barri
+545811,Hugo Duro
+551398,David Alba
+568583,Juan Cruz

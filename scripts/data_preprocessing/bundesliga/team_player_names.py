@@ -10,12 +10,12 @@ from socceraction.data.wyscout import PublicWyscoutLoader
 # load public wyscout data
 wyscout_data = PublicWyscoutLoader()
 
-# save all bundesliga game ids
-bundesliga_game_ids = wyscout_data.games(competition_id = 426, season_id = 181137)["game_id"]
+# Germany 17/18, competition_id = 426, season_id = 181137
+bundesliga_games = wyscout_data.games(competition_id = 426, season_id = 181137)["game_id"]
 
 # find all team data from games
 bl_team_names = pd.DataFrame()
-for i in bundesliga_game_ids:
+for i in bundesliga_games:
     df = wyscout_data.teams(i)
     bl_team_names = pd.concat([bl_team_names, df])
     
@@ -40,9 +40,9 @@ bl_team_names.to_csv('data/bundesliga/team_names.csv', index = False)
 #%%
 
 # list all bundesliga games in directory
-bl_games = os.listdir('bundesliga_game_players')
+bundesliga_games = os.listdir('bundesliga_game_players')
 all_bl_games = pd.DataFrame()
-for i in bl_games:
+for i in bundesliga_games:
     game = pd.read_csv('bundesliga_game_players/' + i)
     all_bl_games = pd.concat([all_bl_games, game])
     
@@ -55,7 +55,6 @@ bl_player_names = all_bl_games.groupby(by = ['player_id', 'nickname']).count() \
 # save as .csv file
 bl_player_names.to_csv('data/bundesliga/player_names.csv', index = False)
 
-#%%
 
 
 
