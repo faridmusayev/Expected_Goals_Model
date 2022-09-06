@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.0.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Farid Musayev">
+<meta name="dcterms.date" content="2022-09-06">
+
+<title>Part 1 | Data Preprocessing</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="data_preprocessing_files/libs/clipboard/clipboard.min.js"></script>
+<script src="data_preprocessing_files/libs/quarto-html/quarto.js"></script>
+<script src="data_preprocessing_files/libs/quarto-html/popper.min.js"></script>
+<script src="data_preprocessing_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="data_preprocessing_files/libs/quarto-html/anchor.min.js"></script>
+<link href="data_preprocessing_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="data_preprocessing_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="data_preprocessing_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="data_preprocessing_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="data_preprocessing_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Part 1 | Data Preprocessing</h1>
+<p class="subtitle lead">Preprocessing required data with pandas</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Farid Musayev </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 6, 2022</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+</header>
+
+<style> body {text-align: justify} </style>
+<p><!-- Justify text. --></p>
+<p>In this section, I will demonstrate a several steps that are required to preprocess data that will be used for building Expected Goals(xG) Model. Most of preprocessing steps will be implemented using <code>pandas</code>.</p>
+<p>In addition to pandas, the following packages are required.</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ast</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np </span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>There are different publicly available soccer match event datasets. For this model, I have decided to work with female soccer match event data due to a high granularity of event descriptions provided by the vendor, Statsbomb. This granularity can help me in building a sophisticated model and include features that can increase its accuracy. To learn more about other available datasets released by Statsbomb, feel free to visit <a href="https://github.com/statsbomb/open-data">this link</a>.</p>
+<p>To extract data from Statsbomb API, different methodologies are present. I prefer to work with <a href="https://socceraction.readthedocs.io/en/latest/#"><code>socceraction</code></a> library that allows me to extract data in a convenient <code>pandas.DataFrame</code> format.</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># import wyscout public match event data loader from socceraction library</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> socceraction.data.statsbomb <span class="im">import</span> StatsBombLoader </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># remove credentials warning from statsbomb api since we work with public data </span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">"ignore"</span>, message<span class="op">=</span><span class="st">"credentials were not supplied. open data access only"</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># load public wyscout data</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>stbm_data <span class="op">=</span> StatsBombLoader()</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># read available competitions and filter out only female related ones</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>competitions <span class="op">=</span> stbm_data.competitions()</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>female_comps <span class="op">=</span> competitions.loc[competitions[<span class="st">'competition_gender'</span>] <span class="op">==</span> <span class="st">'female'</span>, :].reset_index(drop <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>female_comps</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>season_id</th>
+      <th>competition_id</th>
+      <th>competition_name</th>
+      <th>country_name</th>
+      <th>competition_gender</th>
+      <th>season_name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>90</td>
+      <td>37</td>
+      <td>FA Women's Super League</td>
+      <td>England</td>
+      <td>female</td>
+      <td>2020/2021</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>42</td>
+      <td>37</td>
+      <td>FA Women's Super League</td>
+      <td>England</td>
+      <td>female</td>
+      <td>2019/2020</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>4</td>
+      <td>37</td>
+      <td>FA Women's Super League</td>
+      <td>England</td>
+      <td>female</td>
+      <td>2018/2019</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>49</td>
+      <td>NWSL</td>
+      <td>United States of America</td>
+      <td>female</td>
+      <td>2018</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>106</td>
+      <td>53</td>
+      <td>UEFA Women's Euro</td>
+      <td>Europe</td>
+      <td>female</td>
+      <td>2022</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>30</td>
+      <td>72</td>
+      <td>Women's World Cup</td>
+      <td>International</td>
+      <td>female</td>
+      <td>2019</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>As it can be seen from the above dataframe, there are four different female competitions. Three seasons of <strong>FA Women’s Super League</strong>, one season of <strong>NWSL</strong> and two competitions involving national teams, <strong>UEFA Women’s Euro 2022</strong> and <strong>Women’s World Cup 2019</strong>.</p>
+<p>Below code illustrates steps required to read each game from aforementioned competitions and save them as <code>.csv</code> files. In addition, I also save all <code>.csv</code> files into a single <code>all_events</code> dataframe. Later, this will allow me to extract an event of interest from all games at once.</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># names of folders to save files</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dir_names <span class="op">=</span> [<span class="st">'FAWSL_2021'</span>, <span class="st">'FAWSL_1920'</span>, <span class="st">'FAWSL_1819'</span>, <span class="st">'NWSL'</span>, <span class="st">'EURO_2022'</span>, <span class="st">'WC_2019'</span>]</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># for each competition save all games as .csv files</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, j <span class="kw">in</span> female_comps.loc[:, [<span class="st">'season_id'</span>, <span class="st">'competition_id'</span>]].iterrows():</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># j[0] = season_id, j[1] = competition_id</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    games <span class="op">=</span> stbm_data.games(j[<span class="dv">1</span>], j[<span class="dv">0</span>]).loc[:, <span class="st">'game_id'</span>]</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k <span class="kw">in</span> games:</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        events <span class="op">=</span> stbm_data.events(k)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        events.to_csv(<span class="ss">f'data/</span><span class="sc">{</span>dir_names[i]<span class="sc">}</span><span class="ss">/games/</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">.csv'</span>, index <span class="op">=</span> <span class="va">False</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># concatenate all events into a single data frame</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>all_events <span class="op">=</span> pd.DataFrame()</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> dir_names:</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    games <span class="op">=</span> os.listdir(<span class="ss">f'data/</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">/games'</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> games:</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        df <span class="op">=</span> pd.read_csv(<span class="ss">f'data/</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">/games/</span><span class="sc">{</span>j<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        all_events <span class="op">=</span> pd.concat([all_events, df])</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co"># rest index and save as .csv file</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>all_events <span class="op">=</span> all_events.reset_index(drop <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>all_events.to_csv(<span class="st">'data/all_events.csv'</span>, index <span class="op">=</span> <span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>all_events.head(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>game_id</th>
+      <th>event_id</th>
+      <th>period_id</th>
+      <th>team_id</th>
+      <th>player_id</th>
+      <th>type_id</th>
+      <th>type_name</th>
+      <th>index</th>
+      <th>timestamp</th>
+      <th>minute</th>
+      <th>...</th>
+      <th>team_name</th>
+      <th>duration</th>
+      <th>extra</th>
+      <th>related_events</th>
+      <th>player_name</th>
+      <th>position_id</th>
+      <th>position_name</th>
+      <th>location</th>
+      <th>under_pressure</th>
+      <th>counterpress</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>3764230</td>
+      <td>3f5dde74-d91b-44ea-9a1f-88e84da555ab</td>
+      <td>1</td>
+      <td>749</td>
+      <td>NaN</td>
+      <td>35</td>
+      <td>Starting XI</td>
+      <td>1</td>
+      <td>1900-01-01 00:00:00.000</td>
+      <td>0</td>
+      <td>...</td>
+      <td>Tottenham Hotspur Women</td>
+      <td>0.0</td>
+      <td>{'tactics': {'formation': 4231, 'lineup': [{'p...</td>
+      <td>[]</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>3764230</td>
+      <td>e4fefe61-4e08-47e0-be4d-2276388e6eb4</td>
+      <td>1</td>
+      <td>972</td>
+      <td>NaN</td>
+      <td>35</td>
+      <td>Starting XI</td>
+      <td>2</td>
+      <td>1900-01-01 00:00:00.000</td>
+      <td>0</td>
+      <td>...</td>
+      <td>West Ham United LFC</td>
+      <td>0.0</td>
+      <td>{'tactics': {'formation': 433, 'lineup': [{'pl...</td>
+      <td>[]</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3764230</td>
+      <td>ff9a99d3-3efd-45c2-8736-a8a93dd02638</td>
+      <td>1</td>
+      <td>972</td>
+      <td>NaN</td>
+      <td>18</td>
+      <td>Half Start</td>
+      <td>3</td>
+      <td>1900-01-01 00:00:00.000</td>
+      <td>0</td>
+      <td>...</td>
+      <td>West Ham United LFC</td>
+      <td>0.0</td>
+      <td>{}</td>
+      <td>['5fb7026c-83aa-4490-96b1-a55825c4dcb8']</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+<p>3 rows × 26 columns</p>
+</div>
+</div>
+</div>
+<div class="cell" data-scrolled="true" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># list all features to select ones required for xG model</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>all_events.columns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>Index(['game_id', 'event_id', 'period_id', 'team_id', 'player_id', 'type_id',
+       'type_name', 'index', 'timestamp', 'minute', 'second', 'possession',
+       'possession_team_id', 'possession_team_name', 'play_pattern_id',
+       'play_pattern_name', 'team_name', 'duration', 'extra', 'related_events',
+       'player_name', 'position_id', 'position_name', 'location',
+       'under_pressure', 'counterpress'],
+      dtype='object')</code></pre>
+</div>
+</div>
+<p>As it can be seen, there is a wide range of features describing each event. Since xG model evaluates probability of scoring for a given shot, I can filter only <code>shot</code> events, identify several features that may potentially be relevant and test those features later in the model building phase.</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># filter event type_name = 'Shot' and leave only required columns </span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>shots <span class="op">=</span> all_events.loc[all_events[<span class="st">'type_name'</span>] <span class="op">==</span> <span class="st">'Shot'</span>, </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                       [<span class="st">'minute'</span>, <span class="st">'player_name'</span>, <span class="st">'team_name'</span>, <span class="st">'type_name'</span>, <span class="st">'play_pattern_name'</span>, </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                        <span class="st">'position_name'</span>, <span class="st">'location'</span>, <span class="st">'under_pressure'</span>, <span class="st">'extra'</span>]].reset_index(drop <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The following features are left out due to their irrelevance with the context of the model: <em>‘game_id’, ‘event_id’, ‘period_id’, ‘team_id’, ‘player_id’, ‘type_id’, ‘index’, ‘timestamp’, ‘minute’, ‘second’, ‘possession’, ‘possession_team_id’, ‘possession_team_name’, ‘play_pattern_id’, ‘duration’, ‘related_events’, ‘position_id’</em>.</p>
+<p>As you can see the majority of these events are <code>id</code> identifiers. For example, <code>play_pattern_id</code> is ommited while <code>play_pattern</code> is left in the dataframe.</p>
+<p>One of the most important features, as we will later see, is the <code>location</code> of the shot. I extract required (x, y) coordinates from a given list and save them as separate columns for a simpler use case during featuring engineering phase.</p>
+<p>It is important to note that when dataframes are saved as <code>.csv</code> files, all of them are converted into a raw string format. Thus, when reading those dataframes, one needs to convert columns containing specific datatypes into python readable format. For that, I use <code>ast</code> package and, specifically, <code>ast.literal_eval</code> function. This allows me to convert a string of list into a python readable list object.</p>
+<div class="cell" data-execution_count="105">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># unlist location column into (x, y) and remove it</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'location'</span>] <span class="op">=</span> shots.loc[:, <span class="st">'location'</span>].<span class="bu">apply</span>(ast.literal_eval)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'x_start'</span>] <span class="op">=</span> shots.loc[:, <span class="st">'location'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: x[<span class="dv">0</span>])</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'y_start'</span>] <span class="op">=</span> shots.loc[:, <span class="st">'location'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: x[<span class="dv">1</span>])</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>shots <span class="op">=</span> shots.drop(columns <span class="op">=</span> <span class="st">'location'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-scrolled="true" data-execution_count="106">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>shots.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="106">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>minute</th>
+      <th>player_name</th>
+      <th>team_name</th>
+      <th>type_name</th>
+      <th>play_pattern_name</th>
+      <th>position_name</th>
+      <th>under_pressure</th>
+      <th>extra</th>
+      <th>x_start</th>
+      <th>y_start</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>7</td>
+      <td>Lucy Quinn</td>
+      <td>Tottenham Hotspur Women</td>
+      <td>Shot</td>
+      <td>Regular Play</td>
+      <td>Right Wing</td>
+      <td>False</td>
+      <td>{'shot': {'statsbomb_xg': 0.013642391, 'end_lo...</td>
+      <td>95.9</td>
+      <td>58.9</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>10</td>
+      <td>Rianna Dean</td>
+      <td>Tottenham Hotspur Women</td>
+      <td>Shot</td>
+      <td>From Free Kick</td>
+      <td>Center Forward</td>
+      <td>False</td>
+      <td>{'shot': {'statsbomb_xg': 0.04084396, 'end_loc...</td>
+      <td>106.1</td>
+      <td>54.3</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>11</td>
+      <td>Angela Addison</td>
+      <td>Tottenham Hotspur Women</td>
+      <td>Shot</td>
+      <td>From Free Kick</td>
+      <td>Left Wing</td>
+      <td>True</td>
+      <td>{'shot': {'statsbomb_xg': 0.13687119, 'end_loc...</td>
+      <td>110.0</td>
+      <td>28.2</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>13</td>
+      <td>Kit Graham</td>
+      <td>Tottenham Hotspur Women</td>
+      <td>Shot</td>
+      <td>From Throw In</td>
+      <td>Center Attacking Midfield</td>
+      <td>False</td>
+      <td>{'shot': {'statsbomb_xg': 0.12462413, 'end_loc...</td>
+      <td>113.2</td>
+      <td>40.4</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>16</td>
+      <td>Kit Graham</td>
+      <td>Tottenham Hotspur Women</td>
+      <td>Shot</td>
+      <td>From Counter</td>
+      <td>Center Attacking Midfield</td>
+      <td>False</td>
+      <td>{'shot': {'statsbomb_xg': 0.02380701, 'end_loc...</td>
+      <td>95.2</td>
+      <td>39.8</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>There is a <code>extra</code> named column that contains important information describing <code>shot</code> event. This is where we can observe that Statsbomb provides a high level of event data granularity. For example, below you can see that for each shot a location of all players within a visible video frame is recorded. In addition, there is data about body part with which shot was implemented, available technique (which as per event data description guide “name of the technique used for this shot”) and etc. I will come back to feature descriptions and their relevance later.</p>
+<div class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>shots_extra[:, <span class="st">'extra'</span>][<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<pre><code>{'shot': {'statsbomb_xg': 0.013642391,
+  'end_location': [116.7, 44.9, 1.2],
+  'key_pass_id': 'cbd54df9-6804-4fe1-96d5-4891d7d2f5ba',
+  'type': {'id': 87, 'name': 'Open Play'},
+  'outcome': {'id': 100, 'name': 'Saved'},
+  'deflected': True,
+  'technique': {'id': 93, 'name': 'Normal'},
+  'body_part': {'id': 38, 'name': 'Left Foot'},
+  'freeze_frame': [{'location': [119.6, 42.3],
+    'player': {'id': 42787, 'name': 'Mackenzie Arnold'},
+    'position': {'id': 1, 'name': 'Goalkeeper'},
+    'teammate': False},
+   {'location': [107.1, 36.2],
+    'player': {'id': 31550, 'name': 'Angela Addison'},
+    'position': {'id': 21, 'name': 'Left Wing'},
+    'teammate': True},
+   {'location': [107.5, 38.9],
+    'player': {'id': 34232, 'name': 'Grace Fisk'},
+    'position': {'id': 2, 'name': 'Right Back'},
+    'teammate': False},
+   {'location': [100.8, 57.1],
+    'player': {'id': 15724, 'name': 'Mayumi Pacheco'},
+    'position': {'id': 6, 'name': 'Left Back'},
+    'teammate': False},
+   {'location': [105.7, 61.0],
+    'player': {'id': 31556, 'name': 'Laura Vetterlein'},
+    'position': {'id': 5, 'name': 'Left Center Back'},
+    'teammate': False},
+   {'location': [101.2, 59.5],
+    'player': {'id': 24403, 'name': 'Katerina Svitková'},
+    'position': {'id': 15, 'name': 'Left Center Midfield'},
+    'teammate': False},
+   {'location': [101.3, 49.0],
+    'player': {'id': 22798, 'name': 'So-Hyun Cho'},
+    'position': {'id': 13, 'name': 'Right Center Midfield'},
+    'teammate': False},
+   {'location': [97.7, 40.7],
+    'player': {'id': 15421, 'name': 'Kenza Dali'},
+    'position': {'id': 10, 'name': 'Center Defensive Midfield'},
+    'teammate': False},
+   {'location': [95.8, 36.1],
+    'player': {'id': 18153, 'name': 'Alisha Lehmann'},
+    'position': {'id': 17, 'name': 'Right Wing'},
+    'teammate': False},
+   {'location': [108.0, 45.5],
+    'player': {'id': 18151, 'name': 'Gilly Louise Scarlett Flaherty'},
+    'position': {'id': 3, 'name': 'Right Center Back'},
+    'teammate': False},
+   {'location': [102.0, 73.4],
+    'player': {'id': 31551, 'name': 'Kit Graham'},
+    'position': {'id': 19, 'name': 'Center Attacking Midfield'},
+    'teammate': True},
+   {'location': [90.6, 28.2],
+    'player': {'id': 15572, 'name': 'Siri Worm'},
+    'position': {'id': 6, 'name': 'Left Back'},
+    'teammate': True},
+   {'location': [107.1, 41.2],
+    'player': {'id': 31702, 'name': 'Rianna Dean'},
+    'position': {'id': 23, 'name': 'Center Forward'},
+    'teammate': True}]}}</code></pre>
+</div>
+</div>
+<p>I unpack <code>extra</code> column that consists of dictionaries, extract features and save them as separate columns in the dataframe.</p>
+<div class="cell" data-execution_count="107">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># convert 'extra' column to dict readable format using ast.literal_eval</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>shots_extra <span class="op">=</span> shots.loc[:, <span class="st">'extra'</span>].<span class="bu">apply</span>(ast.literal_eval).reset_index(drop <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># specify which features to extract from 'extra' column</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>keys <span class="op">=</span> [<span class="st">'follows_dribble'</span>, <span class="st">'first_time'</span>, <span class="st">'open_goal'</span>, <span class="st">'statsbomb_xg'</span>, <span class="op">\</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">'type'</span>, <span class="st">'technique'</span>, <span class="st">'body_part'</span>, <span class="st">'outcome'</span>]</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># save selected features in a dataframe</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>extra_features <span class="op">=</span> pd.DataFrame(np.nan, columns <span class="op">=</span> keys, index <span class="op">=</span> <span class="bu">range</span>(shots.shape[<span class="dv">0</span>]))</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">#extra_features.loc[:, 'end_location'] = extra_features.loc[:, 'end_location'].astype(object)</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, j <span class="kw">in</span> shots_extra.iteritems():</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">list</span>(j[<span class="st">'shot'</span>].keys()):</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> k <span class="kw">in</span> [<span class="st">'type'</span>, <span class="st">'technique'</span>, <span class="st">'body_part'</span>, <span class="st">'outcome'</span>]:</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>            extra_features.loc[i, k] <span class="op">=</span> j[<span class="st">'shot'</span>][k][<span class="st">'name'</span>]</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> k <span class="kw">in</span> keys:</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>            extra_features.loc[i, k] <span class="op">=</span> j[<span class="st">'shot'</span>][k]</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> k <span class="op">==</span> <span class="st">'freeze_frame'</span>:</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>            extra_features.loc[i, k] <span class="op">=</span> [{<span class="st">'freeze_frame'</span>:j[<span class="st">'shot'</span>][k]}]</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> (k <span class="op">==</span> <span class="st">'end_location'</span>):</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>            extra_features.loc[i, <span class="st">'end_loc'</span>] <span class="op">=</span> [{<span class="st">'end_loc'</span>:j[<span class="st">'shot'</span>][k]}]</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>            <span class="co">#print((i, j['shot'][k]))</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>            <span class="co">#extra_features.loc[i, 'z_end'] = j['shot'][k][0]</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>            <span class="co">#extra_features.loc[i, 'x_end'] = j['shot'][k][1]</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>            <span class="co">#extra_features.loc[i, 'y_end'] = j['shot'][k][2]</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a><span class="co"># fill NAs with boolean = False (technically, these are not NAs but just undeclared False values)</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>extra_features <span class="op">=</span> extra_features.fillna(value <span class="op">=</span> <span class="va">False</span>)</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="co"># transform columns with boolean values into integers </span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>extra_features.loc[:, [<span class="st">'follows_dribble'</span>, <span class="st">'first_time'</span>, <span class="st">'open_goal'</span>]] <span class="op">=</span> <span class="op">\</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>extra_features.loc[:, [<span class="st">'follows_dribble'</span>, <span class="st">'first_time'</span>, <span class="st">'open_goal'</span>]].astype(<span class="bu">int</span>)</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'under_pressure'</span>] <span class="op">=</span> shots.loc[:, <span class="st">'under_pressure'</span>].astype(<span class="bu">int</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="108">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>refined_shots <span class="op">=</span> pd.concat([shots.drop(columns <span class="op">=</span> [<span class="st">'extra'</span>, <span class="st">'type_name'</span>]), extra_features], axis <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>refined_shots.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="108">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>minute</th>
+      <th>player_name</th>
+      <th>team_name</th>
+      <th>play_pattern_name</th>
+      <th>position_name</th>
+      <th>under_pressure</th>
+      <th>x_start</th>
+      <th>y_start</th>
+      <th>follows_dribble</th>
+      <th>first_time</th>
+      <th>open_goal</th>
+      <th>statsbomb_xg</th>
+      <th>type</th>
+      <th>technique</th>
+      <th>body_part</th>
+      <th>outcome</th>
+      <th>end_loc</th>
+      <th>freeze_frame</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>7</td>
+      <td>Lucy Quinn</td>
+      <td>Tottenham Hotspur Women</td>
+      <td>Regular Play</td>
+      <td>Right Wing</td>
+      <td>0</td>
+      <td>95.9</td>
+      <td>58.9</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.013642</td>
+      <td>Open Play</td>
+      <td>Normal</td>
+      <td>Left Foot</td>
+      <td>Saved</td>
+      <td>[{'end_loc': [116.7, 44.9, 1.2]}]</td>
+      <td>[{'freeze_frame': [{'location': [119.6, 42.3],...</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>10</td>
+      <td>Rianna Dean</td>
+      <td>Tottenham Hotspur Women</td>
+      <td>From Free Kick</td>
+      <td>Center Forward</td>
+      <td>0</td>
+      <td>106.1</td>
+      <td>54.3</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.040844</td>
+      <td>Open Play</td>
+      <td>Normal</td>
+      <td>Right Foot</td>
+      <td>Off T</td>
+      <td>[{'end_loc': [120.0, 41.6, 4.2]}]</td>
+      <td>[{'freeze_frame': [{'location': [118.8, 43.2],...</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>11</td>
+      <td>Angela Addison</td>
+      <td>Tottenham Hotspur Women</td>
+      <td>From Free Kick</td>
+      <td>Left Wing</td>
+      <td>1</td>
+      <td>110.0</td>
+      <td>28.2</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.136871</td>
+      <td>Open Play</td>
+      <td>Normal</td>
+      <td>Left Foot</td>
+      <td>Saved</td>
+      <td>[{'end_loc': [117.6, 36.7, 0.4]}]</td>
+      <td>[{'freeze_frame': [{'location': [111.3, 39.8],...</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>13</td>
+      <td>Kit Graham</td>
+      <td>Tottenham Hotspur Women</td>
+      <td>From Throw In</td>
+      <td>Center Attacking Midfield</td>
+      <td>0</td>
+      <td>113.2</td>
+      <td>40.4</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.124624</td>
+      <td>Open Play</td>
+      <td>Normal</td>
+      <td>Head</td>
+      <td>Post</td>
+      <td>[{'end_loc': [120.0, 37.9, 2.9]}]</td>
+      <td>[{'freeze_frame': [{'location': [105.8, 46.6],...</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>16</td>
+      <td>Kit Graham</td>
+      <td>Tottenham Hotspur Women</td>
+      <td>From Counter</td>
+      <td>Center Attacking Midfield</td>
+      <td>0</td>
+      <td>95.2</td>
+      <td>39.8</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.023807</td>
+      <td>Open Play</td>
+      <td>Normal</td>
+      <td>Left Foot</td>
+      <td>Post</td>
+      <td>[{'end_loc': [120.0, 37.3, 2.9]}]</td>
+      <td>[{'freeze_frame': [{'location': [97.8, 49.4], ...</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Finally, I save my dataframe <code>refined_shots</code> as <code>.csv</code> file.</p>
+<div class="cell" data-execution_count="109">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>refined_shots.to_csv(<span class="st">'.data/shots.csv'</span>, index <span class="op">=</span> <span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
