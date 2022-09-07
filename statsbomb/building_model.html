@@ -9,7 +9,7 @@
 <meta name="author" content="Farid Musayev">
 <meta name="dcterms.date" content="2022-09-06">
 
-<title>Part 3 | Building Model</title>
+<title>Part 2 | Building Model</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -114,9 +114,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <ul class="collapse">
   <li><a href="#distance-angle-features" id="toc-distance-angle-features" class="nav-link" data-scroll-target="#distance-angle-features">Distance &amp; Angle Features</a></li>
   </ul></li>
-  <li><a href="#statistical-analysis-of-features" id="toc-statistical-analysis-of-features" class="nav-link" data-scroll-target="#statistical-analysis-of-features">Statistical Analysis of Features</a></li>
+  <li><a href="#statistical-analysis" id="toc-statistical-analysis" class="nav-link" data-scroll-target="#statistical-analysis">Statistical Analysis</a></li>
   <li><a href="#transforming-and-splitting-data" id="toc-transforming-and-splitting-data" class="nav-link" data-scroll-target="#transforming-and-splitting-data">Transforming and Splitting Data</a></li>
-  <li><a href="#models-comparison" id="toc-models-comparison" class="nav-link" data-scroll-target="#models-comparison">Models’ Comparison</a></li>
+  <li><a href="#models-selection" id="toc-models-selection" class="nav-link" data-scroll-target="#models-selection">Models Selection</a>
+  <ul class="collapse">
+  <li><a href="#logistic-regression" id="toc-logistic-regression" class="nav-link" data-scroll-target="#logistic-regression">Logistic Regression</a></li>
+  <li><a href="#gradient-boosting" id="toc-gradient-boosting" class="nav-link" data-scroll-target="#gradient-boosting">Gradient Boosting</a></li>
+  <li><a href="#random-forrest" id="toc-random-forrest" class="nav-link" data-scroll-target="#random-forrest">Random Forrest</a></li>
+  </ul></li>
   </ul>
 </nav>
 </div>
@@ -124,7 +129,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">Part 3 | Building Model</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li></ul></div></div>
+<div class="quarto-title-block"><div><h1 class="title">Part 2 | Building Model</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li></ul></div></div>
 <p class="subtitle lead">Feature engineering, model evaluation and hyperparameter tuning</p>
 </div>
 
@@ -483,8 +488,8 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
 </div>
 </section>
 </section>
-<section id="statistical-analysis-of-features" class="level2">
-<h2 class="anchored" data-anchor-id="statistical-analysis-of-features">Statistical Analysis of Features</h2>
+<section id="statistical-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-analysis">Statistical Analysis</h2>
 <p>I run a logistic regression including all features that could help me understand the statistical signficance of these features. My intention is to analyze p-values for each of the features, and determine which of those values are weakly associated with the response.</p>
 <div class="cell" data-execution_count="428">
 <details>
@@ -738,21 +743,23 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
 </section>
 <section id="transforming-and-splitting-data" class="level2">
 <h2 class="anchored" data-anchor-id="transforming-and-splitting-data">Transforming and Splitting Data</h2>
-<div class="cell" data-execution_count="517">
+<p>One-hot encoding transformation is applied to all categorical variables present in the dataset. These are <strong>body_part</strong>, <strong>technique</strong> and <strong>play_pattern_name</strong>. In addition, features <strong>distance</strong>, <strong>angle</strong>, <strong>gk_loc_x</strong> and <strong>gk_loc_y</strong> are standardized.</p>
+<div class="cell" data-execution_count="721">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare features and labels from available data</span></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> shots.loc[:, [<span class="st">'play_pattern_name'</span>,<span class="st">'under_pressure'</span>, <span class="st">'distance'</span>, <span class="st">'angle'</span>, <span class="st">'gk_loc_x'</span>,</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> shots.loc[:, [<span class="st">'play_pattern_name'</span>,<span class="st">'under_pressure'</span>, <span class="st">'distance'</span>, <span class="st">'angle'</span>, <span class="st">'gk_loc_x'</span>, <span class="st">'gk_loc_y'</span>,</span>
 <span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>                   <span class="st">'follows_dribble'</span>, <span class="st">'first_time'</span>, <span class="st">'open_goal'</span>, <span class="st">'technique'</span>, <span class="st">'body_part'</span>]]</span>
 <span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> shots.loc[:, <span class="st">'outcome'</span>]</span>
 <span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="co"># split data</span></span>
 <span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size <span class="op">=</span> <span class="fl">0.2</span>, random_state <span class="op">=</span> <span class="dv">42</span>)</span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>X_valid, X_test, y_valid, y_test <span class="op">=</span> train_test_split(X_test, y_test, test_size <span class="op">=</span> <span class="fl">0.5</span>, random_state <span class="op">=</span> <span class="dv">42</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="co">#X_valid, X_test, y_valid, y_test = train_test_split(X_test, y_test, test_size = 0.5, random_state = 42)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell" data-execution_count="518">
+<p>In the next section, model selection will be implemented using <code>RandomizedSearchCV</code>. Thus, our dataset is splitted into <code>X_train</code>, <code>y_train</code>, <code>X_test</code>, <code>y_test</code> where k-fold cross validation will be applied on <code>X_train</code>, <code>y_train</code> to find optimal parameters for each type of model. Finally, each model will be run on <code>X_test</code>, <code>y_test</code>.</p>
+<div class="cell" data-execution_count="722">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.compose <span class="im">import</span> ColumnTransformer</span>
@@ -760,168 +767,175 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>column_trans <span class="op">=</span> ColumnTransformer(</span>
 <span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    [(<span class="st">'encode_bodyparts'</span>, OneHotEncoder(dtype<span class="op">=</span><span class="st">'int'</span>), [<span class="st">'play_pattern_name'</span>, <span class="st">'technique'</span>, <span class="st">'body_part'</span>]),</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'std_coords'</span>, StandardScaler(), [<span class="st">'distance'</span>, <span class="st">'angle'</span>, <span class="st">'gk_loc_x'</span>])],</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'std_coords'</span>, StandardScaler(), [<span class="st">'distance'</span>, <span class="st">'angle'</span>, <span class="st">'gk_loc_x'</span>, <span class="st">'gk_loc_y'</span>])],</span>
 <span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    remainder <span class="op">=</span> <span class="st">'passthrough'</span>, verbose_feature_names_out <span class="op">=</span> <span class="va">True</span>)</span>
 <span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>X_train_trans <span class="op">=</span> column_trans.fit_transform(X_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> column_trans.fit_transform(X_train)</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> column_trans.transform(X_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
-<section id="models-comparison" class="level2">
-<h2 class="anchored" data-anchor-id="models-comparison">Models’ Comparison</h2>
-<p><strong>Logistic Regression | Default Approach</strong></p>
-<div class="cell" data-execution_count="519">
+<section id="models-selection" class="level2">
+<h2 class="anchored" data-anchor-id="models-selection">Models Selection</h2>
+<p>Three different classifiers were run and evaluated on a given dataset. These are Logistic Regression, Gradient Boosting and Random Forest. Since I am interested in predictin probabilistic outputs, I prefer to use <strong>Brier score</strong> as an evaluation metric in <code>RandomizedSearchCV</code>. In addition to that, I also evaluate <strong>ROC-AUC</strong> score for each model with its best parameters.</p>
+<section id="logistic-regression" class="level3">
+<h3 class="anchored" data-anchor-id="logistic-regression">Logistic Regression</h3>
+<div class="cell" data-execution_count="715">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> roc_auc_score, brier_score_loss</span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit Logistic Regression Model</span></span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>xG_model <span class="op">=</span> LogisticRegression()</span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>xG_model.fit(X_train_trans, y_train)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> RandomizedSearchCV</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> uniform</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> roc_auc_score, brier_score_loss</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LogisticRegression(solver <span class="op">=</span> <span class="st">'saga'</span>, max_iter <span class="op">=</span> <span class="dv">200</span>, random_state <span class="op">=</span> <span class="dv">42</span>)</span>
 <span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluate</span></span>
-<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>xG_predictions <span class="op">=</span> xG_model.predict_proba(X_train_trans)[:, <span class="dv">1</span>]</span>
-<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>roc_auc_score(y_train, xG_predictions)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>parameters <span class="op">=</span> <span class="bu">dict</span>(C <span class="op">=</span> uniform(loc <span class="op">=</span> <span class="dv">0</span>, scale <span class="op">=</span> <span class="dv">4</span>), </span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>                  penalty <span class="op">=</span> [<span class="st">'l2'</span>, <span class="st">'l1'</span>])</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>classifier <span class="op">=</span> RandomizedSearchCV(model, parameters, random_state <span class="op">=</span> <span class="dv">42</span>, </span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>                                cv <span class="op">=</span> <span class="dv">10</span>, scoring <span class="op">=</span> <span class="st">'neg_brier_score'</span>)</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>classifier.fit(X_train, y_train)</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>classifier.best_params_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="519">
-<pre><code>0.7932825029297309</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="715">
+<pre><code>{'C': 1.49816047538945, 'penalty': 'l2'}</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="520">
+<div class="cell" data-execution_count="716">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>X_valid_trans <span class="op">=</span> column_trans.transform(X_valid)</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>xG_predictions <span class="op">=</span> xG_model.predict_proba(X_valid_trans)[:, <span class="dv">1</span>]</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>roc_auc_score(y_valid, xG_predictions)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluate train data</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> classifier.predict_proba(X_train)[:, <span class="dv">1</span>]</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Train ROC-AUC = '</span>, roc_auc_score(y_train, predictions))</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Train Brier score = '</span>, brier_score_loss(y_train, predictions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="520">
-<pre><code>0.7444304100699057</code></pre>
+<div class="cell-output cell-output-stdout">
+<pre><code>Train ROC-AUC =  0.7927394065600916
+Train Brier score =  0.08145838657226699</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="521">
+<div class="cell" data-execution_count="717">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>brier_score_loss(y_valid, xG_predictions)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluate test data</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> classifier.predict_proba(X_test)[:, <span class="dv">1</span>]</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Test ROC-AUC = '</span>, roc_auc_score(y_test, predictions))</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Test Brier score = '</span>, brier_score_loss(y_test, predictions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="521">
-<pre><code>0.07530598392177701</code></pre>
+<div class="cell-output cell-output-stdout">
+<pre><code>Test ROC-AUC =  0.7811086416845741
+Test Brier score =  0.0778106684846461</code></pre>
 </div>
 </div>
-<p><strong>Gradient Boosting | Best Performer</strong></p>
-<div class="cell" data-execution_count="522">
+</section>
+<section id="gradient-boosting" class="level3">
+<h3 class="anchored" data-anchor-id="gradient-boosting">Gradient Boosting</h3>
+<div class="cell" data-execution_count="718">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># features used:</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co"># X = shots.loc[:, ['play_pattern_name','under_pressure', 'distance', 'angle', 'gk_loc_x', 'gk_loc_y',</span></span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="co">#                   'follows_dribble', 'first_time', 'open_goal', 'technique', 'body_part']]</span></span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> GradientBoostingClassifier</span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>clf <span class="op">=</span> GradientBoostingClassifier(n_estimators <span class="op">=</span> <span class="dv">500</span>, learning_rate <span class="op">=</span> <span class="fl">0.035</span>, loss <span class="op">=</span> <span class="st">'exponential'</span>,</span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span><span class="dv">0</span>).fit(X_train_trans, y_train)</span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>xG_predictions <span class="op">=</span> clf.predict_proba(X_train_trans)[:, <span class="dv">1</span>]</span>
-<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>roc_auc_score(y_train, xG_predictions)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> GradientBoostingClassifier </span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> RandomizedSearchCV</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> uniform, randint</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> roc_auc_score, brier_score_loss</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> GradientBoostingClassifier(random_state <span class="op">=</span> <span class="dv">42</span>)</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>parameters <span class="op">=</span> <span class="bu">dict</span>(learning_rate <span class="op">=</span> uniform(loc <span class="op">=</span> <span class="fl">0.03</span>, scale <span class="op">=</span> <span class="fl">0.035</span>),</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>                  n_estimators <span class="op">=</span> randint(<span class="dv">100</span>, <span class="dv">800</span>),</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>                  loss <span class="op">=</span> [<span class="st">'exponential'</span>, <span class="st">'deviance'</span>])</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>classifier <span class="op">=</span> RandomizedSearchCV(model, parameters, random_state <span class="op">=</span> <span class="dv">42</span>, </span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>                                cv <span class="op">=</span> <span class="dv">10</span>, scoring <span class="op">=</span> <span class="st">'neg_brier_score'</span>)</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>classifier.fit(X_train, y_train)</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>classifier.best_params_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="522">
-<pre><code>0.8523929552072906</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="718">
+<pre><code>{'learning_rate': 0.055619787963399184,
+ 'loss': 'exponential',
+ 'n_estimators': 120}</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="523">
+<div class="cell" data-execution_count="719">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>X_valid_trans <span class="op">=</span> column_trans.transform(X_valid)</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>xG_predictions <span class="op">=</span> clf.predict_proba(X_valid_trans)[:, <span class="dv">1</span>]</span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>roc_auc_score(y_valid, xG_predictions)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluate train data</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> classifier.predict_proba(X_train)[:, <span class="dv">1</span>]</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Train ROC-AUC = '</span>, roc_auc_score(y_train, predictions))</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Train Brier score = '</span>, brier_score_loss(y_train, predictions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="523">
-<pre><code>0.7422036629717546</code></pre>
+<div class="cell-output cell-output-stdout">
+<pre><code>Train ROC-AUC =  0.8248873662260398
+Train Brier score =  0.07651268975293543</code></pre>
 </div>
 </div>
-<div class="cell" data-scrolled="true" data-execution_count="524">
+<div class="cell" data-execution_count="720">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>brier_score_loss(y_valid, xG_predictions)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluate test data</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> classifier.predict_proba(X_test)[:, <span class="dv">1</span>]</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Test ROC-AUC = '</span>, roc_auc_score(y_test, predictions))</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Test Brier score = '</span>, brier_score_loss(y_test, predictions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="524">
-<pre><code>0.07677725372860654</code></pre>
+<div class="cell-output cell-output-stdout">
+<pre><code>Test ROC-AUC =  0.7843049954372847
+Test Brier score =  0.07763277894103415</code></pre>
 </div>
 </div>
-<p><strong>MLP | Not enough data to improve performance</strong></p>
-<div class="cell" data-execution_count="525">
+</section>
+<section id="random-forrest" class="level3">
+<h3 class="anchored" data-anchor-id="random-forrest">Random Forrest</h3>
+<div class="cell" data-execution_count="688">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neural_network <span class="im">import</span> MLPClassifier</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>clf <span class="op">=</span> MLPClassifier(random_state<span class="op">=</span><span class="dv">1</span>, activation <span class="op">=</span> <span class="st">'tanh'</span>, hidden_layer_sizes <span class="op">=</span> (<span class="dv">80</span>, <span class="dv">80</span>, <span class="dv">30</span>, <span class="dv">30</span>), alpha <span class="op">=</span> <span class="fl">0.0001</span>, </span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="co">#                     learning_rate = 'adaptive', </span></span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>                    solver <span class="op">=</span> <span class="st">'sgd'</span>,</span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>                    max_iter <span class="op">=</span> <span class="dv">700</span>).fit(X_train_trans, y_train)</span>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> RandomizedSearchCV</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> uniform, randint</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> roc_auc_score, brier_score_loss</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> RandomForestClassifier(random_state <span class="op">=</span> <span class="dv">42</span>)</span>
 <span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>xG_predictions <span class="op">=</span> clf.predict_proba(X_train_trans)[:, <span class="dv">1</span>]</span>
-<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>roc_auc_score(y_train, xG_predictions)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>parameters <span class="op">=</span> <span class="bu">dict</span>(max_depth <span class="op">=</span> randint(<span class="dv">5</span>, <span class="dv">50</span>),</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>                  criterion <span class="op">=</span> [<span class="st">'entropy'</span>, <span class="st">'gini'</span>],</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>                  min_samples_split <span class="op">=</span> randint(<span class="dv">2</span>, <span class="dv">50</span>))</span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>classifier <span class="op">=</span> RandomizedSearchCV(model, parameters, random_state <span class="op">=</span> <span class="dv">42</span>, </span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>                                cv <span class="op">=</span> <span class="dv">10</span>, scoring <span class="op">=</span> <span class="st">'neg_brier_score'</span>)</span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>classifier.fit(X_train, y_train)</span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>classifier.best_params_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="525">
-<pre><code>0.7883354146095913</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="688">
+<pre><code>{'criterion': 'entropy', 'max_depth': 12, 'min_samples_split': 22}</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="526">
+<div class="cell" data-scrolled="true" data-execution_count="689">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>X_valid_trans <span class="op">=</span> column_trans.transform(X_valid)</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>xG_predictions <span class="op">=</span> clf.predict_proba(X_valid_trans)[:, <span class="dv">1</span>]</span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>roc_auc_score(y_valid, xG_predictions)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluate train data</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> classifier.predict_proba(X_train)[:, <span class="dv">1</span>]</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Train ROC-AUC = '</span>, roc_auc_score(y_train, predictions))</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Train Brier score = '</span>, brier_score_loss(y_train, predictions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="526">
-<pre><code>0.7484701321892898</code></pre>
+<div class="cell-output cell-output-stdout">
+<pre><code>Train ROC-AUC =  0.909537014259732
+Train Brier score =  0.06618085461792976</code></pre>
 </div>
 </div>
-<div class="cell" data-scrolled="true" data-execution_count="513">
+<div class="cell" data-execution_count="690">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>brier_score_loss(y_valid, xG_predictions)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluate test data</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> classifier.predict_proba(X_test)[:, <span class="dv">1</span>]</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Test ROC-AUC = '</span>, roc_auc_score(y_test, predictions))</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Test Brier score = '</span>, brier_score_loss(y_test, predictions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="513">
-<pre><code>0.07539088442913291</code></pre>
+<div class="cell-output cell-output-stdout">
+<pre><code>Test ROC-AUC =  0.7729558545033509
+Test Brier score =  0.07860378186146198</code></pre>
 </div>
 </div>
-<p><strong>Random Forrest | Performance Close to Gradient Boosting</strong></p>
-<div class="cell" data-execution_count="527">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier</span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="co"># clf = RandomForestClassifier(max_depth = 10, random_state = 12, criterion = 'entropy')</span></span>
-<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>clf <span class="op">=</span> RandomForestClassifier(max_depth <span class="op">=</span> <span class="dv">10</span>, random_state <span class="op">=</span> <span class="dv">12</span>, criterion <span class="op">=</span> <span class="st">'entropy'</span>)</span>
-<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>clf.fit(X_train_trans, y_train)</span>
-<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>xG_predictions <span class="op">=</span> clf.predict_proba(X_train_trans)[:, <span class="dv">1</span>]</span>
-<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>roc_auc_score(y_train, xG_predictions)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-display" data-execution_count="527">
-<pre><code>0.9121693589441353</code></pre>
-</div>
-</div>
-<div class="cell" data-scrolled="true" data-execution_count="528">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>X_valid_trans <span class="op">=</span> column_trans.transform(X_valid)</span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>xG_predictions <span class="op">=</span> clf.predict_proba(X_valid_trans)[:, <span class="dv">1</span>]</span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>roc_auc_score(y_valid, xG_predictions)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-display" data-execution_count="528">
-<pre><code>0.7357738626712255</code></pre>
-</div>
-</div>
-<div class="cell" data-scrolled="true" data-execution_count="529">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>brier_score_loss(y_valid, xG_predictions)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-display" data-execution_count="529">
-<pre><code>0.07679120654707627</code></pre>
-</div>
-</div>
+<p>To sum up, when comparing Brier scores for each of classifiers, it can be seen that Gradient Boosting by a small margin outperforms both Logistic Regression and Random Forest. In addition, Gradient Boosting also demonstrates the highest ROC-AUC value 0.784. This value is well above 0.5 which proves that the classifier performs much better than a random guess.</p>
+</section>
 </section>
 
 </main>

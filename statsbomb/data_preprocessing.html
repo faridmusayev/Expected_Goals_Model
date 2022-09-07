@@ -505,7 +505,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <p>There is a <code>extra</code> named column that contains important information describing <code>shot</code> event. This is where we can observe that Statsbomb provides a high level of event data granularity. For example, below you can see that for each shot a location of all players within a visible video frame is recorded. In addition, there is data about body part with which shot was implemented, available technique (which as per event data description guide “name of the technique used for this shot”) and etc. I will come back to feature descriptions and their relevance later.</p>
 <div class="cell" data-execution_count="15">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>shots_extra[:, <span class="st">'extra'</span>][<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'extra'</span>][<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="15">
 <pre><code>{'shot': {'statsbomb_xg': 0.013642391,
   'end_location': [116.7, 44.9, 1.2],
@@ -603,8 +603,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'under_pressure'</span>] <span class="op">=</span> shots.loc[:, <span class="st">'under_pressure'</span>].astype(<span class="bu">int</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-execution_count="108">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>refined_shots <span class="op">=</span> pd.concat([shots.drop(columns <span class="op">=</span> [<span class="st">'extra'</span>, <span class="st">'type_name'</span>]), extra_features], axis <span class="op">=</span> <span class="dv">1</span>)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>refined_shots.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>shots <span class="op">=</span> pd.concat([shots.drop(columns <span class="op">=</span> [<span class="st">'extra'</span>, <span class="st">'type_name'</span>]), extra_features], axis <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>shots.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="108">
 
 <div>
@@ -744,9 +744,28 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 </div>
 </div>
-<p>Finally, I save my dataframe <code>refined_shots</code> as <code>.csv</code> file.</p>
-<div class="cell" data-execution_count="109">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>refined_shots.to_csv(<span class="st">'.data/shots.csv'</span>, index <span class="op">=</span> <span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Also, I would like to derive opposing team’s goalkeeper location during each executed shot. These coordinates are present in <code>freeze_fram</code> column.</p>
+<div class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># write a custom function to unpack dictionaries within freeze_frame column</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ff_unpacking(players):</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    players <span class="op">=</span> players[<span class="dv">0</span>][<span class="st">'freeze_frame'</span>]</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> players:</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> i[<span class="st">'position'</span>][<span class="st">'name'</span>] <span class="op">==</span> <span class="st">'Goalkeeper'</span> <span class="kw">and</span> i[<span class="st">'teammate'</span>] <span class="op">==</span> <span class="va">False</span>:</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>            gk_loc <span class="op">=</span> i[<span class="st">'location'</span>]</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> gk_loc</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'gk_loc'</span>] <span class="op">=</span> shots.loc[:, <span class="st">'freeze_frame'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: ff_unpacking(x))</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Note that there are 42 None instances where goalkeeper location was incorrectly labeled.</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>shots <span class="op">=</span> shots.loc[<span class="op">~</span>shots.loc[:, <span class="st">'gk_loc'</span>].isnull(), :].reset_index(drop <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co"># save (x, y) coordinates of an opponent team's goalkeeper as separate columns</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'gk_loc_x'</span>] <span class="op">=</span> shots.loc[:, <span class="st">'gk_loc'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: x[<span class="dv">0</span>])</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'gk_loc_y'</span>] <span class="op">=</span> shots.loc[:, <span class="st">'gk_loc'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: x[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Finally, I save my dataframe <code>shots</code> as <code>.csv</code> file.</p>
+<div class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>shots.to_csv(<span class="st">'.data/shots.csv'</span>, index <span class="op">=</span> <span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 </main>
