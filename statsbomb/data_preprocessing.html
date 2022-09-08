@@ -111,7 +111,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <h1 class="title">Part 1 | Data Preprocessing</h1>
-<p class="subtitle lead">Preprocessing required data with pandas</p>
+<p class="subtitle lead">Preprocessing raw data with pandas</p>
 </div>
 
 
@@ -139,32 +139,31 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <style> body {text-align: justify} </style>
 <p><!-- Justify text. --></p>
-<p>In this section, I will demonstrate a several steps that are required to preprocess data that will be used for building Expected Goals(xG) Model. Most of preprocessing steps will be implemented using <code>pandas</code>.</p>
-<p>In addition to pandas, the following packages are required.</p>
+<p>In this section, I will demonstrate several steps that are required to preprocess data that will be used for building Expected Goals (xG) Model. Most of preprocessing steps will be implemented using <code>pandas</code>.</p>
+<p>In addition to pandas, the following packages need to be imported.</p>
 <div class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ast</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np </span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>There are different publicly available soccer match event datasets. For this model, I have decided to work with female soccer match event data due to a high granularity of event descriptions provided by the vendor, Statsbomb. This granularity can help me in building a sophisticated model and include features that can increase its accuracy. To learn more about other available datasets released by Statsbomb, feel free to visit <a href="https://github.com/statsbomb/open-data">this link</a>.</p>
+<p>There are different publicly available soccer match event datasets. For this model, I decided to work with female soccer match event data due to a high granularity of event descriptions provided by the vendor, Statsbomb. This granularity can help me in building a sophisticated model and design features that can increase its accuracy. To learn more about other available datasets released by Statsbomb, feel free to visit <a href="https://github.com/statsbomb/open-data">this link</a>.</p>
 <p>To extract data from Statsbomb API, different methodologies are present. I prefer to work with <a href="https://socceraction.readthedocs.io/en/latest/#"><code>socceraction</code></a> library that allows me to extract data in a convenient <code>pandas.DataFrame</code> format.</p>
 <div class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># import wyscout public match event data loader from socceraction library</span></span>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># import wyscout public match event data loader from socceraction library</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> socceraction.data.statsbomb <span class="im">import</span> StatsBombLoader </span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># remove credentials warning from statsbomb api since we work with public data </span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">"ignore"</span>, message<span class="op">=</span><span class="st">"credentials were not supplied. open data access only"</span>)</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># load public wyscout data</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>stbm_data <span class="op">=</span> StatsBombLoader()</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># read available competitions and filter out only female related ones</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>competitions <span class="op">=</span> stbm_data.competitions()</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>female_comps <span class="op">=</span> competitions.loc[competitions[<span class="st">'competition_gender'</span>] <span class="op">==</span> <span class="st">'female'</span>, :].reset_index(drop <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>female_comps</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># load public wyscout data</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>stbm_data <span class="op">=</span> StatsBombLoader()</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># read available competitions and filter out only female related ones</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>competitions <span class="op">=</span> stbm_data.competitions()</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>female_comps <span class="op">=</span> competitions.loc[competitions[<span class="st">'competition_gender'</span>] <span class="op">==</span> <span class="st">'female'</span>, :].reset_index(drop <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>female_comps</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 
 <div>
@@ -241,8 +240,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 </div>
 </div>
-<p>As it can be seen from the above dataframe, there are four different female competitions. Three seasons of <strong>FA Women’s Super League</strong>, one season of <strong>NWSL</strong> and two competitions involving national teams, <strong>UEFA Women’s Euro 2022</strong> and <strong>Women’s World Cup 2019</strong>.</p>
-<p>Below code illustrates steps required to read each game from aforementioned competitions and save them as <code>.csv</code> files. In addition, I also save all <code>.csv</code> files into a single <code>all_events</code> dataframe. Later, this will allow me to extract an event of interest from all games at once.</p>
+<p>As it can be seen, data is available for four different female soccer competitions. Three seasons of <strong>FA Women’s Super League</strong>, one season of <strong>NWSL</strong> and two competitions involving national teams, <strong>UEFA Women’s Euro 2022</strong> and <strong>Women’s World Cup 2019</strong>.</p>
+<p>Below code illustrates steps required to read each game from aforementioned competitions and save them as <code>.csv</code> files. I also save all <code>.csv</code> files into a single <code>all_events</code> dataframe. Later, this will allow me to extract an event of interest from all games at once.</p>
 <div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># names of folders to save files</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dir_names <span class="op">=</span> [<span class="st">'FAWSL_2021'</span>, <span class="st">'FAWSL_1920'</span>, <span class="st">'FAWSL_1819'</span>, <span class="st">'NWSL'</span>, <span class="st">'EURO_2022'</span>, <span class="st">'WC_2019'</span>]</span>
@@ -253,19 +252,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    games <span class="op">=</span> stbm_data.games(j[<span class="dv">1</span>], j[<span class="dv">0</span>]).loc[:, <span class="st">'game_id'</span>]</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k <span class="kw">in</span> games:</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        events <span class="op">=</span> stbm_data.events(k)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        events.to_csv(<span class="ss">f'data/</span><span class="sc">{</span>dir_names[i]<span class="sc">}</span><span class="ss">/games/</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">.csv'</span>, index <span class="op">=</span> <span class="va">False</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        events.to_csv(<span class="ss">f'.data/</span><span class="sc">{</span>dir_names[i]<span class="sc">}</span><span class="ss">/games/</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">.csv'</span>, index <span class="op">=</span> <span class="va">False</span>)</span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># concatenate all events into a single data frame</span></span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>all_events <span class="op">=</span> pd.DataFrame()</span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> dir_names:</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    games <span class="op">=</span> os.listdir(<span class="ss">f'data/</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">/games'</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    games <span class="op">=</span> os.listdir(<span class="ss">f'.data/</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">/games'</span>)</span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> games:</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        df <span class="op">=</span> pd.read_csv(<span class="ss">f'data/</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">/games/</span><span class="sc">{</span>j<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        df <span class="op">=</span> pd.read_csv(<span class="ss">f'.data/</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">/games/</span><span class="sc">{</span>j<span class="sc">}</span><span class="ss">'</span>)</span>
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        all_events <span class="op">=</span> pd.concat([all_events, df])</span>
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co"># rest index and save as .csv file</span></span>
 <span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>all_events <span class="op">=</span> all_events.reset_index(drop <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>all_events.to_csv(<span class="st">'data/all_events.csv'</span>, index <span class="op">=</span> <span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>all_events.to_csv(<span class="st">'.data/all_events.csv'</span>, index <span class="op">=</span> <span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>all_events.head(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -379,6 +378,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 </div>
 </div>
+<p>There is a wide range of data describing each event. Since xG model evaluates probability of a shot resulting into a goal, I can filter only <code>shot</code> events, extract columns of interest to this event and test those columns after preprocessing in the model building phase.</p>
 <div class="cell" data-scrolled="true" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># list all features to select ones required for xG model</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>all_events.columns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -392,7 +392,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       dtype='object')</code></pre>
 </div>
 </div>
-<p>As it can be seen, there is a wide range of features describing each event. Since xG model evaluates probability of scoring for a given shot, I can filter only <code>shot</code> events, identify several features that may potentially be relevant and test those features later in the model building phase.</p>
 <div class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># filter event type_name = 'Shot' and leave only required columns </span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>shots <span class="op">=</span> all_events.loc[all_events[<span class="st">'type_name'</span>] <span class="op">==</span> <span class="st">'Shot'</span>, </span>
@@ -400,9 +399,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                        <span class="st">'position_name'</span>, <span class="st">'location'</span>, <span class="st">'under_pressure'</span>, <span class="st">'extra'</span>]].reset_index(drop <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The following features are left out due to their irrelevance with the context of the model: <em>‘game_id’, ‘event_id’, ‘period_id’, ‘team_id’, ‘player_id’, ‘type_id’, ‘index’, ‘timestamp’, ‘minute’, ‘second’, ‘possession’, ‘possession_team_id’, ‘possession_team_name’, ‘play_pattern_id’, ‘duration’, ‘related_events’, ‘position_id’</em>.</p>
-<p>As you can see the majority of these events are <code>id</code> identifiers. For example, <code>play_pattern_id</code> is ommited while <code>play_pattern</code> is left in the dataframe.</p>
-<p>One of the most important features, as we will later see, is the <code>location</code> of the shot. I extract required (x, y) coordinates from a given list and save them as separate columns for a simpler use case during featuring engineering phase.</p>
-<p>It is important to note that when dataframes are saved as <code>.csv</code> files, all of them are converted into a raw string format. Thus, when reading those dataframes, one needs to convert columns containing specific datatypes into python readable format. For that, I use <code>ast</code> package and, specifically, <code>ast.literal_eval</code> function. This allows me to convert a string of list into a python readable list object.</p>
+<p>As you can see the majority of these events are <code>id</code> identifiers. For example, <code>play_pattern_id</code> is ommited while <code>play_pattern</code> is left in the dataframe. The rest of columns include time or possession related information which will not make any use in our case.</p>
+<p>One of the most important columns, as we will later see, is the <code>location</code> of the shot. I extract required (x, y) coordinates from a given list and save them as separate columns for a simpler use case during featuring engineering phase.</p>
+<p>It is important to note that when dataframes are saved as <code>.csv</code> files, all of them are converted into a raw string format. Thus, when reading those dataframes, one needs to convert columns containing specific datatypes into python readable format. For that, I use <code>ast</code> package and, specifically, <code>ast.literal_eval()</code> function. This allows me to convert a string of a list into python readable list object.</p>
 <div class="cell" data-execution_count="105">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># unlist location column into (x, y) and remove it</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'location'</span>] <span class="op">=</span> shots.loc[:, <span class="st">'location'</span>].<span class="bu">apply</span>(ast.literal_eval)</span>
@@ -503,73 +502,67 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 </div>
 </div>
-<p>There is a <code>extra</code> named column that contains important information describing <code>shot</code> event. This is where we can observe that Statsbomb provides a high level of event data granularity. For example, below you can see that for each shot a location of all players within a visible video frame is recorded. In addition, there is data about body part with which shot was implemented, available technique (which as per event data description guide “name of the technique used for this shot”) and etc. I will come back to feature descriptions and their relevance later.</p>
-<div class="cell" data-execution_count="15">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'extra'</span>][<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="15">
-<pre><code>{'shot': {'statsbomb_xg': 0.013642391,
-  'end_location': [116.7, 44.9, 1.2],
-  'key_pass_id': 'cbd54df9-6804-4fe1-96d5-4891d7d2f5ba',
+<p>There is <code>extra</code> named column that contains additional information describing <code>shot</code> event. This is where we can observe that Statsbomb provides a high level of event data granularity. For example, below you can see that for each shot, the location of all players, specifically opposing team’s goalkeeper, within a visible video frame is recorded. In addition, there is data about <code>body_part</code> with which shot was implemented, available <code>technique</code> (which as per event data description guide is “name of the technique used for this shot”), <code>open_goal</code> variable which is a boolean that describes if a shot was taken with an open goal, and <code>follows_dribble</code> boolean variable that describes if a taken shot was followed by dribble or not, <code>first_time</code> boolean variable that describes if a shot was taken with the first touch or not. Due to vendor specifications, only boolean variables with <code>True</code> state appear in <code>extra</code> column, thus, I have to specify <code>False</code> state for all other cases explicitly.</p>
+<p>As you can see, variables <code>follows_dribble</code> and <code>open_goal</code> are missing from below instance of <code>extra</code> column due to <code>False</code> state.</p>
+<div class="cell" data-execution_count="150">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'extra'</span>][<span class="dv">148</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="150">
+<pre><code>{'shot': {'open_goal': True,
+  'statsbomb_xg': 0.84770715,
+  'end_location': [120.0, 39.0, 0.9],
+  'body_part': {'id': 40, 'name': 'Right Foot'},
   'type': {'id': 87, 'name': 'Open Play'},
-  'outcome': {'id': 100, 'name': 'Saved'},
-  'deflected': True,
-  'technique': {'id': 93, 'name': 'Normal'},
-  'body_part': {'id': 38, 'name': 'Left Foot'},
-  'freeze_frame': [{'location': [119.6, 42.3],
-    'player': {'id': 42787, 'name': 'Mackenzie Arnold'},
-    'position': {'id': 1, 'name': 'Goalkeeper'},
-    'teammate': False},
-   {'location': [107.1, 36.2],
-    'player': {'id': 31550, 'name': 'Angela Addison'},
+  'outcome': {'id': 97, 'name': 'Goal'},
+  'first_time': True,
+  'technique': {'id': 91, 'name': 'Half Volley'},
+  'freeze_frame': [{'location': [111.4, 38.3],
+    'player': {'id': 4647, 'name': 'So-Yun Ji'},
+    'position': {'id': 13, 'name': 'Right Center Midfield'},
+    'teammate': True},
+   {'location': [108.8, 42.9],
+    'player': {'id': 4636, 'name': 'Maria Thorisdottir'},
+    'position': {'id': 2, 'name': 'Right Back'},
+    'teammate': True},
+   {'location': [110.1, 53.6],
+    'player': {'id': 4961, 'name': 'Samantha May Kerr'},
     'position': {'id': 21, 'name': 'Left Wing'},
     'teammate': True},
-   {'location': [107.5, 38.9],
-    'player': {'id': 34232, 'name': 'Grace Fisk'},
-    'position': {'id': 2, 'name': 'Right Back'},
+   {'location': [106.3, 51.4],
+    'player': {'id': 10108, 'name': 'Pernille Mosegaard Harder'},
+    'position': {'id': 17, 'name': 'Right Wing'},
+    'teammate': True},
+   {'location': [110.8, 35.7],
+    'player': {'id': 46738, 'name': 'Emma Bissell'},
+    'position': {'id': 16, 'name': 'Left Midfield'},
     'teammate': False},
-   {'location': [100.8, 57.1],
-    'player': {'id': 15724, 'name': 'Mayumi Pacheco'},
-    'position': {'id': 6, 'name': 'Left Back'},
-    'teammate': False},
-   {'location': [105.7, 61.0],
-    'player': {'id': 31556, 'name': 'Laura Vetterlein'},
-    'position': {'id': 5, 'name': 'Left Center Back'},
-    'teammate': False},
-   {'location': [101.2, 59.5],
-    'player': {'id': 24403, 'name': 'Katerina Svitková'},
-    'position': {'id': 15, 'name': 'Left Center Midfield'},
-    'teammate': False},
-   {'location': [101.3, 49.0],
-    'player': {'id': 22798, 'name': 'So-Hyun Cho'},
+   {'location': [110.1, 39.8],
+    'player': {'id': 36801, 'name': 'Aimee Palmer'},
     'position': {'id': 13, 'name': 'Right Center Midfield'},
     'teammate': False},
-   {'location': [97.7, 40.7],
-    'player': {'id': 15421, 'name': 'Kenza Dali'},
-    'position': {'id': 10, 'name': 'Center Defensive Midfield'},
+   {'location': [116.1, 42.8],
+    'player': {'id': 16376, 'name': 'Sophie Baggaley'},
+    'position': {'id': 1, 'name': 'Goalkeeper'},
     'teammate': False},
-   {'location': [95.8, 36.1],
-    'player': {'id': 18153, 'name': 'Alisha Lehmann'},
-    'position': {'id': 17, 'name': 'Right Wing'},
+   {'location': [116.1, 45.7],
+    'player': {'id': 16381, 'name': 'Gemma Evans'},
+    'position': {'id': 5, 'name': 'Left Center Back'},
     'teammate': False},
-   {'location': [108.0, 45.5],
-    'player': {'id': 18151, 'name': 'Gilly Louise Scarlett Flaherty'},
+   {'location': [110.5, 46.1],
+    'player': {'id': 15618, 'name': 'Jasmine Matthews'},
     'position': {'id': 3, 'name': 'Right Center Back'},
     'teammate': False},
-   {'location': [102.0, 73.4],
-    'player': {'id': 31551, 'name': 'Kit Graham'},
-    'position': {'id': 19, 'name': 'Center Attacking Midfield'},
-    'teammate': True},
-   {'location': [90.6, 28.2],
-    'player': {'id': 15572, 'name': 'Siri Worm'},
+   {'location': [111.2, 50.0],
+    'player': {'id': 24922, 'name': 'Florence Allen'},
+    'position': {'id': 2, 'name': 'Right Back'},
+    'teammate': False},
+   {'location': [114.5, 49.3],
+    'player': {'id': 24239, 'name': 'Jemma Elizabeth Purfield'},
     'position': {'id': 6, 'name': 'Left Back'},
-    'teammate': True},
-   {'location': [107.1, 41.2],
-    'player': {'id': 31702, 'name': 'Rianna Dean'},
-    'position': {'id': 23, 'name': 'Center Forward'},
-    'teammate': True}]}}</code></pre>
+    'teammate': False}]}}</code></pre>
 </div>
 </div>
-<p>I unpack <code>extra</code> column that consists of dictionaries, extract features and save them as separate columns in the dataframe.</p>
+<p>In addition to above mentioned data, I also extract contenxtual information from <code>extra</code> column. These are <code>type</code>, <code>statsbomb_xg</code> and <code>outcome</code> variables. The last one is important for knowing if a taken shot results into a goal or not. <code>type</code> will help me to filter out only open play situations, and discard outlying conditions where a shot is taken directly from corner, free-kick, penalty or kick-off. These are situations which can largely skew performance of existent xG Model, and it is better to build a separate model that focuses only on those conditions.</p>
+<p>I unpack <code>extra</code> column that consists of dictionaries, extract required data and save it as separate columns in the dataframe.</p>
 <div class="cell" data-execution_count="107">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># convert 'extra' column to dict readable format using ast.literal_eval</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>shots_extra <span class="op">=</span> shots.loc[:, <span class="st">'extra'</span>].<span class="bu">apply</span>(ast.literal_eval).reset_index(drop <span class="op">=</span> <span class="va">True</span>)</span>
@@ -579,28 +572,24 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">'type'</span>, <span class="st">'technique'</span>, <span class="st">'body_part'</span>, <span class="st">'outcome'</span>]</span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># save selected features in a dataframe</span></span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>extra_features <span class="op">=</span> pd.DataFrame(np.nan, columns <span class="op">=</span> keys, index <span class="op">=</span> <span class="bu">range</span>(shots.shape[<span class="dv">0</span>]))</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">#extra_features.loc[:, 'end_location'] = extra_features.loc[:, 'end_location'].astype(object)</span></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, j <span class="kw">in</span> shots_extra.iteritems():</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">list</span>(j[<span class="st">'shot'</span>].keys()):</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> k <span class="kw">in</span> [<span class="st">'type'</span>, <span class="st">'technique'</span>, <span class="st">'body_part'</span>, <span class="st">'outcome'</span>]:</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>            extra_features.loc[i, k] <span class="op">=</span> j[<span class="st">'shot'</span>][k][<span class="st">'name'</span>]</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> k <span class="kw">in</span> keys:</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>            extra_features.loc[i, k] <span class="op">=</span> j[<span class="st">'shot'</span>][k]</span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> k <span class="op">==</span> <span class="st">'freeze_frame'</span>:</span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>            extra_features.loc[i, k] <span class="op">=</span> [{<span class="st">'freeze_frame'</span>:j[<span class="st">'shot'</span>][k]}]</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> (k <span class="op">==</span> <span class="st">'end_location'</span>):</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>            extra_features.loc[i, <span class="st">'end_loc'</span>] <span class="op">=</span> [{<span class="st">'end_loc'</span>:j[<span class="st">'shot'</span>][k]}]</span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>            <span class="co">#print((i, j['shot'][k]))</span></span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>            <span class="co">#extra_features.loc[i, 'z_end'] = j['shot'][k][0]</span></span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>            <span class="co">#extra_features.loc[i, 'x_end'] = j['shot'][k][1]</span></span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>            <span class="co">#extra_features.loc[i, 'y_end'] = j['shot'][k][2]</span></span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a><span class="co"># fill NAs with boolean = False (technically, these are not NAs but just undeclared False values)</span></span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>extra_features <span class="op">=</span> extra_features.fillna(value <span class="op">=</span> <span class="va">False</span>)</span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="co"># transform columns with boolean values into integers </span></span>
-<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>extra_features.loc[:, [<span class="st">'follows_dribble'</span>, <span class="st">'first_time'</span>, <span class="st">'open_goal'</span>]] <span class="op">=</span> <span class="op">\</span></span>
-<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>extra_features.loc[:, [<span class="st">'follows_dribble'</span>, <span class="st">'first_time'</span>, <span class="st">'open_goal'</span>]].astype(<span class="bu">int</span>)</span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'under_pressure'</span>] <span class="op">=</span> shots.loc[:, <span class="st">'under_pressure'</span>].astype(<span class="bu">int</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, j <span class="kw">in</span> shots_extra.iteritems():</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">list</span>(j[<span class="st">'shot'</span>].keys()):</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> k <span class="kw">in</span> [<span class="st">'type'</span>, <span class="st">'technique'</span>, <span class="st">'body_part'</span>, <span class="st">'outcome'</span>]:</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>            extra_features.loc[i, k] <span class="op">=</span> j[<span class="st">'shot'</span>][k][<span class="st">'name'</span>]</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> k <span class="kw">in</span> keys:</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>            extra_features.loc[i, k] <span class="op">=</span> j[<span class="st">'shot'</span>][k]</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> k <span class="op">==</span> <span class="st">'freeze_frame'</span>:</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>            extra_features.loc[i, k] <span class="op">=</span> [{<span class="st">'freeze_frame'</span>:j[<span class="st">'shot'</span>][k]}]</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> (k <span class="op">==</span> <span class="st">'end_location'</span>):</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>            extra_features.loc[i, <span class="st">'end_loc'</span>] <span class="op">=</span> [{<span class="st">'end_loc'</span>:j[<span class="st">'shot'</span>][k]}]</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="co"># fill NAs with boolean = False (technically, these are not NAs but just undeclared False values)</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>extra_features <span class="op">=</span> extra_features.fillna(value <span class="op">=</span> <span class="va">False</span>)</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="co"># transform columns with boolean values into integers </span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>extra_features.loc[:, [<span class="st">'follows_dribble'</span>, <span class="st">'first_time'</span>, <span class="st">'open_goal'</span>]] <span class="op">=</span> <span class="op">\</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>extra_features.loc[:, [<span class="st">'follows_dribble'</span>, <span class="st">'first_time'</span>, <span class="st">'open_goal'</span>]].astype(<span class="bu">int</span>)</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'under_pressure'</span>] <span class="op">=</span> shots.loc[:, <span class="st">'under_pressure'</span>].astype(<span class="bu">int</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-execution_count="108">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>shots <span class="op">=</span> pd.concat([shots.drop(columns <span class="op">=</span> [<span class="st">'extra'</span>, <span class="st">'type_name'</span>]), extra_features], axis <span class="op">=</span> <span class="dv">1</span>)</span>
@@ -744,7 +733,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 </div>
 </div>
-<p>Also, I would like to derive opposing team’s goalkeeper location during each executed shot. These coordinates are present in <code>freeze_fram</code> column.</p>
+<p>Also, I would like to extract opposing team’s goalkeeper location during each executed shot. These coordinates are present in <code>freeze_frame</code> column.</p>
 <div class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># write a custom function to unpack dictionaries within freeze_frame column</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ff_unpacking(players):</span>
@@ -759,14 +748,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Note that there are 42 None instances where goalkeeper location was incorrectly labeled.</span></span>
 <span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>shots <span class="op">=</span> shots.loc[<span class="op">~</span>shots.loc[:, <span class="st">'gk_loc'</span>].isnull(), :].reset_index(drop <span class="op">=</span> <span class="va">True</span>)</span>
 <span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co"># save (x, y) coordinates of an opponent team's goalkeeper as separate columns</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co"># save (x, y) coordinates of a goalkeeper as separate columns</span></span>
 <span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'gk_loc_x'</span>] <span class="op">=</span> shots.loc[:, <span class="st">'gk_loc'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: x[<span class="dv">0</span>])</span>
 <span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'gk_loc_y'</span>] <span class="op">=</span> shots.loc[:, <span class="st">'gk_loc'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: x[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Finally, I save my dataframe <code>shots</code> as <code>.csv</code> file.</p>
+<p>Finally, I save my <code>shots</code> dataframe as <code>.csv</code> file.</p>
 <div class="cell" data-execution_count="22">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>shots.to_csv(<span class="st">'.data/shots.csv'</span>, index <span class="op">=</span> <span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>This is the end of preprocessing stage for data that will be used in xG model. Now, we can move on to model building phase which will include exploratory data analysis, feature engineering and model selection.</p>
 
 </main>
 <!-- /main column -->

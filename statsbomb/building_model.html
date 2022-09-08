@@ -116,12 +116,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </ul></li>
   <li><a href="#statistical-analysis" id="toc-statistical-analysis" class="nav-link" data-scroll-target="#statistical-analysis">Statistical Analysis</a></li>
   <li><a href="#transforming-and-splitting-data" id="toc-transforming-and-splitting-data" class="nav-link" data-scroll-target="#transforming-and-splitting-data">Transforming and Splitting Data</a></li>
-  <li><a href="#models-selection" id="toc-models-selection" class="nav-link" data-scroll-target="#models-selection">Models Selection</a>
+  <li><a href="#model-selection" id="toc-model-selection" class="nav-link" data-scroll-target="#model-selection">Model Selection</a>
   <ul class="collapse">
   <li><a href="#logistic-regression" id="toc-logistic-regression" class="nav-link" data-scroll-target="#logistic-regression">Logistic Regression</a></li>
   <li><a href="#gradient-boosting" id="toc-gradient-boosting" class="nav-link" data-scroll-target="#gradient-boosting">Gradient Boosting</a></li>
-  <li><a href="#random-forrest" id="toc-random-forrest" class="nav-link" data-scroll-target="#random-forrest">Random Forrest</a></li>
+  <li><a href="#random-forest" id="toc-random-forest" class="nav-link" data-scroll-target="#random-forest">Random Forest</a></li>
   </ul></li>
+  <li><a href="#future-improvements" id="toc-future-improvements" class="nav-link" data-scroll-target="#future-improvements">Future Improvements</a></li>
   </ul>
 </nav>
 </div>
@@ -130,7 +131,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">Part 2 | Building Model</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li></ul></div></div>
-<p class="subtitle lead">Feature engineering, model evaluation and hyperparameter tuning</p>
+<p class="subtitle lead">Exploratory data analysis, feature engineering and model selection</p>
 </div>
 
 
@@ -160,8 +161,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p><!-- Justify text. --></p>
 <section id="package-prerequisites" class="level2">
 <h2 class="anchored" data-anchor-id="package-prerequisites">Package prerequisites</h2>
-<p>In this part, the following libraries need to be imported.</p>
-<div class="cell" data-execution_count="110">
+<p>In this part, the following packages need to be imported. <code>scikit-learn</code> libraries will be imported in required places in <strong>Model Selection</strong> section.</p>
+<div class="cell" data-execution_count="723">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
@@ -170,16 +171,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> cm</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mplsoccer <span class="im">import</span> Pitch, VerticalPitch</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>config InlineBackend.figure_formats <span class="op">=</span> [<span class="st">'png'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib.lines <span class="im">import</span> Line2D</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mplsoccer <span class="im">import</span> Pitch, VerticalPitch</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>config InlineBackend.figure_formats <span class="op">=</span> [<span class="st">'svg'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
 <section id="exploratory-data-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory Data Analysis</h2>
-<p>First of all, I read a preprocessed (see Part 1 and Part 2) <code>.csv</code> data file and convert all required columns to python readable object types.</p>
-<div class="cell" data-execution_count="3">
+<p>Firstly, I read a preprocessed <code>.csv</code> data file and convert all required columns to python readable object types.</p>
+<div class="cell" data-execution_count="754">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># read shots.csv file </span></span>
@@ -189,7 +191,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'end_loc'</span>] <span class="op">=</span> shots.loc[:, <span class="st">'end_loc'</span>].<span class="bu">apply</span>(ast.literal_eval)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>Prediction of a goal outcome in soccer is a binary classification task { 0 - No goal ; 1 - Goal }. However, the key point to note is that, in xG model, we are not dealing with hard classes but rather trying to make a probabilistic prediction for a shot outcome. In comparison with hard classes, probabilistic outputs allow to better understand the quality of shot. In other words, given a shot, how likely it is to result into a goal. This is what xG value estimates for a given shot.</p>
+<p>Prediction of a goal outcome in soccer is a binary classification task { 0 - No goal ; 1 - Goal }. However, the key point to note is that, in xG model, we are not dealing with hard classes but rather trying to make a probabilistic prediction for a shot outcome. In comparison with hard classes, probabilistic outputs allow to describe the quality of shot since not all shots are equally probable to be scored. In other words, given a shot, how likely it is to result into a goal. This is what xG value estimates for a given shot.</p>
 <p>As you can see from below code snippet, there are different outcome types for a given shot such as <em>Saved</em>, <em>Off target</em>, shot that hit <em>Post</em>, <em>Blocked</em>, way off target <em>Wayward</em> shot and etc. To build a binary probabilistic classifier, it is necessary for us to define predictions as hard classes. Here, I convert each value of <code>outcome_type</code> column to 1 for <em>Goal</em> scenario or 0 for the rest of scenarios.</p>
 <div class="cell" data-execution_count="5">
 <details>
@@ -201,7 +203,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
        'Saved Off Target', 'Saved to Post'], dtype=object)</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="22">
+<div class="cell" data-execution_count="755">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># rename existing 'outcome' column to 'outcome_type' </span></span>
@@ -210,7 +212,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'outcome'</span>] <span class="op">=</span> shots.loc[:, <span class="st">'outcome_type'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: <span class="dv">1</span> <span class="cf">if</span> x <span class="op">==</span> <span class="st">'Goal'</span> <span class="cf">else</span> <span class="dv">0</span>)</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>shots.loc[:, <span class="st">'outcome'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="22">
+<div class="cell-output cell-output-display" data-execution_count="755">
 <pre><code>0        0
 1        0
 2        0
@@ -225,107 +227,107 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 Name: outcome, Length: 11043, dtype: int64</code></pre>
 </div>
 </div>
-<p>Now, let us analyze the types of available shots and their corresponding distribution. From <a href="#fig-1">Figure&nbsp;1</a> it can be seen that our dataframe has a data on 11043 shots. As we can see below, 1165 of them resulted into a goal.</p>
-<div class="cell" data-execution_count="138">
+<p>Now, let us analyze the types of available shots and their frequencies. From <a href="#fig-1">Figure&nbsp;1</a>, it can be seen that our dataframe has a data on 11043 shots. As we can see below, 1165 of them resulted into a goal.</p>
+<div class="cell" data-execution_count="724">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>shot_types <span class="op">=</span> pd.DataFrame(shots.loc[:, <span class="st">'outcome_type'</span>].value_counts()).reset_index()</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>shot_types.columns <span class="op">=</span> [<span class="st">'outcome_type'</span>, <span class="st">'n'</span>]</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>shot_types <span class="op">=</span> shot_types.sort_values(by <span class="op">=</span> <span class="st">'n'</span>, ascending <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Canvas</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize <span class="op">=</span> (<span class="dv">5</span>, <span class="dv">5</span>))</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co"># grid specs</span></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>ax.grid(color <span class="op">=</span> <span class="st">'black'</span>, ls <span class="op">=</span> <span class="st">'-.'</span>, lw <span class="op">=</span> <span class="fl">0.25</span>, axis <span class="op">=</span> <span class="st">"x"</span>)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Main plot</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>pl <span class="op">=</span> ax.barh(shot_types[<span class="st">"outcome_type"</span>], shot_types[<span class="st">"n"</span>], height <span class="op">=</span> <span class="fl">0.6</span>, label <span class="op">=</span> <span class="st">'n'</span>,</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>       color <span class="op">=</span> <span class="st">'skyblue'</span>, edgecolor <span class="op">=</span> <span class="st">"black"</span>, zorder <span class="op">=</span> <span class="dv">2</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>) </span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Barplot labels</span></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>ax.bar_label(pl, padding <span class="op">=</span> <span class="dv">5</span>, label_type<span class="op">=</span><span class="st">'edge'</span>)</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Labels and titles</span></span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Outcome Type"</span>, fontsize <span class="op">=</span> <span class="dv">10</span>)</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"# of instances"</span>, fontsize <span class="op">=</span> <span class="dv">10</span>)</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>ax.tick_params(axis <span class="op">=</span> <span class="st">'both'</span>, which <span class="op">=</span> <span class="st">'major'</span>, labelsize <span class="op">=</span> <span class="dv">10</span>)</span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">""</span>, loc <span class="op">=</span> <span class="st">"left"</span>, pad <span class="op">=</span> <span class="dv">1</span>, fontdict <span class="op">=</span> font)</span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data preparation</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>shot_types <span class="op">=</span> pd.DataFrame(shots.loc[:, <span class="st">'outcome_type'</span>].value_counts()).reset_index()</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>shot_types.columns <span class="op">=</span> [<span class="st">'outcome_type'</span>, <span class="st">'n'</span>]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>shot_types <span class="op">=</span> shot_types.sort_values(by <span class="op">=</span> <span class="st">'n'</span>, ascending <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Canvas</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize <span class="op">=</span> (<span class="dv">5</span>, <span class="dv">5</span>))</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># grid specs</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>ax.grid(color <span class="op">=</span> <span class="st">'black'</span>, ls <span class="op">=</span> <span class="st">'-.'</span>, lw <span class="op">=</span> <span class="fl">0.25</span>, axis <span class="op">=</span> <span class="st">"x"</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Main plot</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>pl <span class="op">=</span> ax.barh(shot_types[<span class="st">"outcome_type"</span>], shot_types[<span class="st">"n"</span>], height <span class="op">=</span> <span class="fl">0.6</span>, label <span class="op">=</span> <span class="st">'n'</span>,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>       color <span class="op">=</span> <span class="st">'skyblue'</span>, edgecolor <span class="op">=</span> <span class="st">"black"</span>, zorder <span class="op">=</span> <span class="dv">2</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>) </span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Barplot labels</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>ax.bar_label(pl, padding <span class="op">=</span> <span class="dv">5</span>, label_type<span class="op">=</span><span class="st">'edge'</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Labels and titles</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Outcome Type"</span>, fontsize <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"# of instances"</span>, fontsize <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>ax.tick_params(axis <span class="op">=</span> <span class="st">'both'</span>, which <span class="op">=</span> <span class="st">'major'</span>, labelsize <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">""</span>, loc <span class="op">=</span> <span class="st">"left"</span>, pad <span class="op">=</span> <span class="dv">1</span>, fontdict <span class="op">=</span> font)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="fig-1" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="building_model_files/figure-html/fig-1-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="building_model_files/figure-html/fig-1-output-1.svg" class="img-fluid figure-img"></p>
 <p></p><figcaption class="figure-caption">Figure 1: Distribution of shot outcomes across female soccer competitions.</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
-<p>To sum up, we can see that the majority of shots are off target, blocked or saved. Out of 11043 shots, only 1165 are goals. Thus, we can conclude that our data is imbalanced.</p>
+<p>To sum up, we can see that the majority of shots are off target, blocked or saved. Since only 1165 out of 11043 shots are goals, we can conclude that our data is imbalanced. This will affect our choice of model evaluation metric, later in the model selection phase.</p>
 <p>Next, we can visualize the location of all shots.</p>
-<div class="cell" data-execution_count="135">
+<div class="cell" data-execution_count="725">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Canvas</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>pitch <span class="op">=</span> Pitch(pitch_type <span class="op">=</span> <span class="st">'statsbomb'</span>)  </span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> pitch.draw(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">8</span>))</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(data <span class="op">=</span> shots, x <span class="op">=</span> <span class="st">'x_start'</span>, y <span class="op">=</span> <span class="st">'y_start'</span>, ax <span class="op">=</span> ax,</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                hue <span class="op">=</span> <span class="st">'outcome'</span>, palette <span class="op">=</span> <span class="st">'seismic'</span>, edgecolor <span class="op">=</span> <span class="st">'black'</span>, alpha <span class="op">=</span> <span class="fl">0.4</span>)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># legend design</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib.lines <span class="im">import</span> Line2D</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>custom <span class="op">=</span> [Line2D([], [], marker<span class="op">=</span><span class="st">'.'</span>, color<span class="op">=</span><span class="st">'b'</span>, linestyle<span class="op">=</span><span class="st">'None'</span>),</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>          Line2D([], [], marker<span class="op">=</span><span class="st">'.'</span>, color<span class="op">=</span><span class="st">'r'</span>, linestyle<span class="op">=</span><span class="st">'None'</span>)]</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>plt.legend(custom, [<span class="st">'No Goal'</span>, <span class="st">'Goal'</span>], bbox_to_anchor<span class="op">=</span>(<span class="fl">0.05</span>, <span class="fl">0.21</span>))</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Arrow </span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>arrow_ax <span class="op">=</span> fig.add_axes([<span class="fl">0.28</span>, <span class="fl">0.22</span>, <span class="fl">0.35</span>, <span class="fl">0.3</span>]) <span class="co"># X, Y, width, height</span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>arrow_ax.arrow(<span class="fl">0.45</span>, <span class="fl">0.1</span>, <span class="fl">0.30</span>, <span class="dv">0</span>, head_width<span class="op">=</span><span class="fl">0.03</span>, head_length<span class="op">=</span><span class="fl">0.03</span>, linewidth<span class="op">=</span><span class="dv">4</span>, </span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>           color<span class="op">=</span><span class="st">'darkgrey'</span>, length_includes_head<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>arrow_ax.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>arrow_ax.set_xlim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>arrow_ax.set_axis_off()</span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>arrow_ax.annotate(<span class="st">'Direction of Play'</span>, xy <span class="op">=</span> (<span class="fl">0.42</span>, <span class="fl">0.02</span>), fontsize <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(data <span class="op">=</span> shots, x <span class="op">=</span> <span class="st">'x_start'</span>, y <span class="op">=</span> <span class="st">'y_start'</span>, ax <span class="op">=</span> ax,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                hue <span class="op">=</span> <span class="st">'outcome'</span>, palette <span class="op">=</span> <span class="st">'seismic'</span>, edgecolor <span class="op">=</span> <span class="st">'black'</span>, alpha <span class="op">=</span> <span class="fl">0.4</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># legend design</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>custom <span class="op">=</span> [Line2D([], [], marker <span class="op">=</span> <span class="st">'.'</span>, color <span class="op">=</span> <span class="st">'b'</span>, linestyle <span class="op">=</span> <span class="st">'None'</span>),</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>          Line2D([], [], marker <span class="op">=</span> <span class="st">'.'</span>, color <span class="op">=</span> <span class="st">'r'</span>, linestyle <span class="op">=</span> <span class="st">'None'</span>)]</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>plt.legend(custom, [<span class="st">'No Goal'</span>, <span class="st">'Goal'</span>], bbox_to_anchor <span class="op">=</span> (<span class="fl">0.05</span>, <span class="fl">0.21</span>))</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Arrow design</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>arrow_ax <span class="op">=</span> fig.add_axes([<span class="fl">0.28</span>, <span class="fl">0.22</span>, <span class="fl">0.35</span>, <span class="fl">0.3</span>]) <span class="co"># X, Y, width, height</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>arrow_ax.arrow(<span class="fl">0.45</span>, <span class="fl">0.1</span>, <span class="fl">0.30</span>, <span class="dv">0</span>, head_width <span class="op">=</span> <span class="fl">0.03</span>, head_length <span class="op">=</span> <span class="fl">0.03</span>, linewidth <span class="op">=</span> <span class="dv">4</span>, </span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>           color <span class="op">=</span> <span class="st">'darkgrey'</span>, length_includes_head <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>arrow_ax.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>arrow_ax.set_xlim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>arrow_ax.set_axis_off()</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>arrow_ax.annotate(<span class="st">'Direction of Play'</span>, xy <span class="op">=</span> (<span class="fl">0.42</span>, <span class="fl">0.02</span>), fontsize <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="fig-2" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="building_model_files/figure-html/fig-2-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="building_model_files/figure-html/fig-2-output-1.svg" class="img-fluid figure-img"></p>
 <p></p><figcaption class="figure-caption">Figure 2: Distribution of shots according to their coordinates.</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
-<p>The majority of shots is made in the central block of the final third area. In addition, there are several outlying shots made from a central area and flang positions. On the right flang, some of outliers even resulted into <em>Goal</em>.</p>
+<p>The majority of shots is made in the central block of the final third area. In addition, there are several outlying shots made from a central area and flang positions. On the right flang, some of outliers even resulted into a Goal.</p>
 </section>
 <section id="feature-engineering" class="level2">
 <h2 class="anchored" data-anchor-id="feature-engineering">Feature Engineering</h2>
-<p>When it comes to the analysis of a shot made by a player, first of all, one can even intuitively predict whether that shot will have a decent outcome or not. In practice, there are two major factors which drive that intuition and can be actually quantified. These are <strong>distance</strong> to goal and <strong>angle</strong> under which shot was implemented.</p>
+<p>When it comes to the analysis of a shot made by a player, one can even intuitively predict whether that shot will have a decent outcome or not. In practice, there are two major factors which drive that intuition and can be actually quantified. These are <strong>distance</strong> to a goal and <strong>angle</strong> under which a shot was implemented.</p>
 <div class="cell" data-execution_count="397">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>config InlineBackend.figure_formats <span class="op">=</span> [<span class="st">'png'</span>]</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Visual shots on Pitch</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>pitch <span class="op">=</span> VerticalPitch(pitch_type <span class="op">=</span> <span class="st">'statsbomb'</span>,</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                      half <span class="op">=</span> <span class="va">True</span>, </span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                      pad_left <span class="op">=</span> <span class="dv">0</span>, pad_right <span class="op">=</span> <span class="dv">0</span>, pad_top <span class="op">=</span> <span class="dv">0</span>, pad_bottom <span class="op">=</span> <span class="fl">0.15</span>)  </span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> pitch.draw(nrows <span class="op">=</span> <span class="dv">1</span>, ncols <span class="op">=</span> <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">12</span>))</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pitch design</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>pitch <span class="op">=</span> VerticalPitch(pitch_type <span class="op">=</span> <span class="st">'statsbomb'</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                      half <span class="op">=</span> <span class="va">True</span>, </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                      pad_left <span class="op">=</span> <span class="dv">0</span>, pad_right <span class="op">=</span> <span class="dv">0</span>, pad_top <span class="op">=</span> <span class="dv">0</span>, pad_bottom <span class="op">=</span> <span class="fl">0.15</span>)  </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Canvas</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> pitch.draw(nrows <span class="op">=</span> <span class="dv">1</span>, ncols <span class="op">=</span> <span class="dv">3</span>, figsize <span class="op">=</span> (<span class="dv">10</span>, <span class="dv">12</span>))</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Data preparation</span></span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.array([<span class="dv">100</span>, <span class="dv">120</span>, <span class="dv">105</span>, <span class="dv">120</span>, <span class="dv">110</span>, <span class="dv">120</span>]).reshape(<span class="dv">3</span>, <span class="dv">2</span>)</span>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.array([<span class="dv">20</span>, <span class="dv">40</span>, <span class="dv">50</span>, <span class="dv">40</span>, <span class="dv">40</span>, <span class="dv">40</span>]).reshape(<span class="dv">3</span>, <span class="dv">2</span>)</span>
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>):</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot</span></span>
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    pitch.goal_angle(x[i][<span class="dv">0</span>], y[i][<span class="dv">0</span>], ax <span class="op">=</span> ax[i], alpha <span class="op">=</span> <span class="fl">0.4</span>, color <span class="op">=</span> <span class="st">'skyblue'</span>)</span>
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    pitch.lines(x[i][<span class="dv">0</span>], y[i][<span class="dv">0</span>], x[i][<span class="dv">1</span>], y[i][<span class="dv">1</span>], ax <span class="op">=</span> ax[i], linewidth <span class="op">=</span> <span class="dv">1</span>)</span>
 <span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
@@ -346,29 +348,29 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
 <p>To demonstrate an impact of <strong>distance</strong> and <strong>angle</strong> features on a probability of a shot resulting into a goal, I evaluate these features from a given (x, y) coordinate of each shot and build a simple logistic regression that makes probabilitistic predictions.</p>
 <p>To evaluate distance to the goal, I calculate euclidean distance between (x, y) coordinate of a shot and goal centerline. Since I work with Statsbomb data, I use their pitch dimensions which are [0, 120] on x axis and [0, 80] on y axis. Thus, goal centerline coordinates are (120, 40).</p>
 <p>Below, you can see my implementation:</p>
-<div class="cell" data-execution_count="237">
+<div class="cell" data-execution_count="756">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Distance Feature calculation</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># define goal center for 'statsbomb'</span></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>goal_center <span class="op">=</span> np.array([<span class="dv">120</span>, <span class="dv">40</span>])</span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate distance between shot and goal center</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate distance between a shot coordinate and goal centerline coordinate</span></span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>shots[<span class="st">'distance'</span>] <span class="op">=</span> np.sqrt((shots[<span class="st">'x_start'</span>] <span class="op">-</span> goal_center[<span class="dv">0</span>])<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> (shots[<span class="st">'y_start'</span>] <span class="op">-</span> goal_center[<span class="dv">1</span>])<span class="op">**</span><span class="dv">2</span>)</span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>shots[<span class="st">'distance'</span>] <span class="op">=</span> shots[<span class="st">'distance'</span>].<span class="bu">round</span>(decimals <span class="op">=</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Next, I calculate angle of a shot. To evaluate angle (alpha) of a shot, our task breaks down to finding an angle between two sides of a triangle given that all lengths (a, b, c) of triangle are known.</p>
+<p>Next, I calculate an angle of a shot. The task breaks down to finding an angle between two sides of a triangle given that all lengths (a, b, c) of a triangle are known.</p>
 <p>Below, you can see my implementation:</p>
-<div class="cell" data-execution_count="238">
+<div class="cell" data-execution_count="757">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Angle Feature calculation</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># transform x, y coordinates from percentiles to field length coordinates (105 meters x 68 meters)</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># transform (x, y) coordinates from percentiles to field length coordinates (105 meters x 68 meters)</span></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> shots[<span class="st">'x_start'</span>] <span class="op">*</span> <span class="dv">105</span><span class="op">/</span><span class="dv">120</span></span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> shots[<span class="st">'y_start'</span>] <span class="op">*</span> <span class="dv">68</span><span class="op">/</span><span class="dv">80</span> </span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Use trigonometric formula to find angle between two sides (a,b) of triangle where third side (c) </span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># is a goal line of length 7.32</span></span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> np.sqrt((x <span class="op">-</span> <span class="dv">105</span>)<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> (y <span class="op">-</span> <span class="fl">30.34</span>)<span class="op">**</span><span class="dv">2</span>) <span class="co"># length between right post and (x,y) shot coordinate</span></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> np.sqrt((x <span class="op">-</span> <span class="dv">105</span>)<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> (y <span class="op">-</span> <span class="fl">37.66</span>)<span class="op">**</span><span class="dv">2</span>) <span class="co"># length between left post and (x,y) shot coordinate</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Use trigonometric formula to find an angle between two sides (a,b) of a triangle where the third side (c) </span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># is a goal line of length 7.32 meters.</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> np.sqrt((x <span class="op">-</span> <span class="dv">105</span>)<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> (y <span class="op">-</span> <span class="fl">30.34</span>)<span class="op">**</span><span class="dv">2</span>) <span class="co"># length between right post and (x, y) shot coordinate</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> np.sqrt((x <span class="op">-</span> <span class="dv">105</span>)<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> (y <span class="op">-</span> <span class="fl">37.66</span>)<span class="op">**</span><span class="dv">2</span>) <span class="co"># length between left post and (x, y) shot coordinate</span></span>
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> <span class="fl">7.32</span> <span class="co"># goal line length in meters</span></span>
 <span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>cos_alpha <span class="op">=</span> (a<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> b<span class="op">**</span><span class="dv">2</span> <span class="op">-</span> c<span class="op">**</span><span class="dv">2</span>)<span class="op">/</span>(<span class="dv">2</span><span class="op">*</span>a<span class="op">*</span>b)</span>
 <span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>cos_alpha <span class="op">=</span> np.<span class="bu">round</span>(cos_alpha, decimals <span class="op">=</span> <span class="dv">4</span>)</span>
@@ -377,8 +379,8 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
 <span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>shots[<span class="st">'angle'</span>] <span class="op">=</span> np.arccos(cos_alpha)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now, I would like to demonstrate how both of these features impact probability of scoring.</p>
-<p>I run a simple logistic regression that includes only these features (distance, angle) and obtain probabilisitc predictions for each shot. Then, I plot both of these features against my probabilistic predictions to visualize the relationship. This is a raw model which does not make any kinds of feature preprocessing since the goal here is to illustrate relationship between our features and probability of scoring.</p>
-<div class="cell" data-execution_count="394">
+<p>I run a simple logistic regression that includes only these features (distance, angle) and obtain probabilisitc predictions for each shot. Then, I plot both of these features against my probabilistic predictions to visualize the relationship. The goal here is to illustrate relationship between our features and probability of scoring.</p>
+<div class="cell" data-execution_count="732">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
@@ -389,15 +391,15 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> shots.loc[:, <span class="st">'outcome'</span>]</span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit Logistic Regression Model</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>xG_model <span class="op">=</span> LogisticRegression()</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>xG_model.fit(X, y)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>classifier <span class="op">=</span> LogisticRegression()</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>classifier.fit(X, y)</span>
 <span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="co"># make predictions</span></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>xG_predictions <span class="op">=</span> xG_model.predict_proba(X)[:, <span class="dv">1</span>]</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> classifier.predict_proba(X)[:, <span class="dv">1</span>]</span>
 <span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Canvas</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(nrows <span class="op">=</span> <span class="dv">1</span>, ncols <span class="op">=</span> <span class="dv">2</span>, figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">4</span>))</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(nrows <span class="op">=</span> <span class="dv">1</span>, ncols <span class="op">=</span> <span class="dv">2</span>, figsize <span class="op">=</span> (<span class="dv">10</span>, <span class="dv">4</span>))</span>
 <span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Distance plot design</span></span>
 <span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a></span>
@@ -405,7 +407,7 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
 <span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].grid(color <span class="op">=</span> <span class="st">'black'</span>, ls <span class="op">=</span> <span class="st">'-.'</span>, lw <span class="op">=</span> <span class="fl">0.25</span>, axis <span class="op">=</span> <span class="st">"both"</span>)</span>
 <span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].scatter(X[<span class="st">'distance'</span>], xG_predictions, color <span class="op">=</span> <span class="st">'gray'</span>, s <span class="op">=</span> <span class="fl">0.5</span>, alpha <span class="op">=</span> <span class="fl">0.4</span>)</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].scatter(X[<span class="st">'distance'</span>], predictions, color <span class="op">=</span> <span class="st">'gray'</span>, s <span class="op">=</span> <span class="fl">0.5</span>, alpha <span class="op">=</span> <span class="fl">0.4</span>)</span>
 <span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_xlabel(<span class="st">'Distance'</span>)</span>
 <span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_ylabel(<span class="st">'Probability of scoring'</span>)</span>
 <span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a></span>
@@ -423,7 +425,7 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
 <span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].grid(color <span class="op">=</span> <span class="st">'black'</span>, ls <span class="op">=</span> <span class="st">'-.'</span>, lw <span class="op">=</span> <span class="fl">0.25</span>, axis <span class="op">=</span> <span class="st">"both"</span>)</span>
 <span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
-<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].scatter(X[<span class="st">'angle'</span>], xG_predictions, color <span class="op">=</span> <span class="st">'orange'</span>, s <span class="op">=</span> <span class="fl">0.5</span>, alpha <span class="op">=</span> <span class="fl">0.4</span>)</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].scatter(X[<span class="st">'angle'</span>], predictions, color <span class="op">=</span> <span class="st">'orange'</span>, s <span class="op">=</span> <span class="fl">0.5</span>, alpha <span class="op">=</span> <span class="fl">0.4</span>)</span>
 <span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_xlabel(<span class="st">'Angle'</span>)</span>
 <span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_ylabel(<span class="st">'Probability of scoring'</span>)</span>
 <span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a></span>
@@ -442,19 +444,19 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
 <div class="cell-output cell-output-display">
 <div id="fig-4" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="building_model_files/figure-html/fig-4-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="building_model_files/figure-html/fig-4-output-1.svg" class="img-fluid figure-img"></p>
 <p></p><figcaption class="figure-caption">Figure 4: Probability of scoring decreases with increasing distance (a) and increases with increasing angle (b).</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
-<p>As it can be seen from a) part of <a href="#fig-4">Figure&nbsp;4</a>, indeed, probability of scoring (or you can also call it xG value) decreases exponentially with increasing distance. On the contrast, probability of scoring increases in a linear shape with increasing angle.</p>
-<p>In both plots of <a href="#fig-4">Figure&nbsp;4</a>, there are densely populated parts that can be analyzed in a slightly different way. These are the areas from where majority of shots is executed. When analyzing <a href="#fig-5">Figure&nbsp;5</a>, we can observe that most of the shots are executed within a distance range of 5 to 30 meters. Similarly, most of the angles of executed shots are distributed within 0 to 60 degrees (0 to 1 radian respectively).</p>
-<div class="cell" data-scrolled="true" data-execution_count="393">
+<p>As it can be seen from a) part of <a href="#fig-4">Figure&nbsp;4</a>, indeed, probability of scoring (or you can also call it xG value) decreases exponentially with increasing distance. On the contrast, probability of scoring increases linearly with increasing angle.</p>
+<p>In both plots of <a href="#fig-4">Figure&nbsp;4</a>, there are densely populated parts that can be analyzed in a slightly different way. These are the areas from where majority of shots is executed. When analyzing <a href="#fig-5">Figure&nbsp;5</a>, we can observe that most of the shots are executed within a distance range of 5 to 30 meters. Similarly, most of the angles of executed shots are distributed within 0 to 60 degrees (0 to 1 radians respectively).</p>
+<div class="cell" data-execution_count="735">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Canvas</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(nrows <span class="op">=</span> <span class="dv">1</span>, ncols <span class="op">=</span> <span class="dv">2</span>, figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">4</span>))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(nrows <span class="op">=</span> <span class="dv">1</span>, ncols <span class="op">=</span> <span class="dv">2</span>, figsize <span class="op">=</span> (<span class="dv">10</span>, <span class="dv">4</span>))</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Distance density plot design</span></span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].grid(color <span class="op">=</span> <span class="st">'black'</span>, ls <span class="op">=</span> <span class="st">'-.'</span>, lw <span class="op">=</span> <span class="fl">0.25</span>, axis <span class="op">=</span> <span class="st">"both"</span>)</span>
@@ -480,8 +482,8 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
 <div class="cell-output cell-output-display">
 <div id="fig-5" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="building_model_files/figure-html/fig-5-output-1.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure 5: Distribution of distances (a) and angles for shots (b).</figcaption><p></p>
+<p><img src="building_model_files/figure-html/fig-5-output-1.svg" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure 5: Distribution of distances (a) and angles (b) for all executed shots.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -494,21 +496,23 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
 <div class="cell" data-execution_count="428">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> shots.loc[:, [<span class="st">'play_pattern_name'</span>,<span class="st">'under_pressure'</span>, <span class="st">'distance'</span>, <span class="st">'angle'</span>, <span class="st">'gk_loc_x'</span>, <span class="st">'gk_loc_y'</span>,</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>                   <span class="st">'follows_dribble'</span>, <span class="st">'first_time'</span>, <span class="st">'open_goal'</span>, <span class="st">'technique'</span>, <span class="st">'body_part'</span>]]</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> shots.loc[:, <span class="st">'outcome'</span>]</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>df_train <span class="op">=</span> pd.concat([X, y], axis <span class="op">=</span> <span class="dv">1</span>).reset_index(drop <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co"># run model</span></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>logreg_model <span class="op">=</span> smf.logit(</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    formula <span class="op">=</span> <span class="st">"outcome ~ distance + angle + under_pressure + gk_loc_y + gk_loc_x + </span><span class="ch">\</span></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="st">    body_part + open_goal + play_pattern_name"</span>,</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>                         data <span class="op">=</span> df_train).fit()</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(logreg_model.pvalues, columns <span class="op">=</span> [<span class="st">'p-value'</span>]).<span class="bu">round</span>(decimals <span class="op">=</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data Preparation</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> shots.loc[:, [<span class="st">'play_pattern_name'</span>,<span class="st">'under_pressure'</span>, <span class="st">'distance'</span>, <span class="st">'angle'</span>, <span class="st">'gk_loc_x'</span>, <span class="st">'gk_loc_y'</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>                   <span class="st">'follows_dribble'</span>, <span class="st">'first_time'</span>, <span class="st">'open_goal'</span>, <span class="st">'technique'</span>, <span class="st">'body_part'</span>]]</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> shots.loc[:, <span class="st">'outcome'</span>]</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>df_train <span class="op">=</span> pd.concat([X, y], axis <span class="op">=</span> <span class="dv">1</span>).reset_index(drop <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co"># run model</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>logreg_model <span class="op">=</span> smf.logit(</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    formula <span class="op">=</span> <span class="st">"outcome ~ distance + angle + under_pressure + gk_loc_y + gk_loc_x + </span><span class="ch">\</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="st">    body_part + open_goal + play_pattern_name"</span>,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>                         data <span class="op">=</span> df_train).fit()</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract p-values</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(logreg_model.pvalues, columns <span class="op">=</span> [<span class="st">'p-value'</span>]).<span class="bu">round</span>(decimals <span class="op">=</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Optimization terminated successfully.
@@ -604,8 +608,8 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
 </div>
 </div>
 </div>
-<p>There are several categorical variables which have very high p-values. These are <strong>body_part[T.Other]</strong>, <strong>play_pattern_name[T.From Keeper]</strong>, <strong>play_pattern_name[T.From Kick Off]</strong>, <strong>play_pattern_name[T.Other]</strong> and <strong>gk_loc_y</strong>. Let us break down those features and consider if we can leave them out of our model.</p>
-<p>First, there is a <strong>play_pattern_name</strong> column that describes different attacking phases in which a shot was executed. As it can be seen from below code snippet, there are in total 9 attacking phases.</p>
+<p>There are several categorical variables which have very high p-values. These are <strong>body_part[T.Other]</strong>, <strong>play_pattern_name[T.From Keeper]</strong>, <strong>play_pattern_name[T.From Kick Off]</strong>, <strong>play_pattern_name[T.Other]</strong> and <strong>gk_loc_y</strong>. Let us analyze those features and consider if we can leave them out of our model.</p>
+<p>First, there is a <strong>play_pattern_name</strong> column that describes different types of play during which a shot was executed. As it can be seen from below code snippet, there are in total 9 types of play.</p>
 <div class="cell" data-execution_count="431">
 <details>
 <summary>Code</summary>
@@ -617,73 +621,74 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
        'Other'], dtype=object)</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="454">
+<div class="cell" data-execution_count="741">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>play_types <span class="op">=</span> pd.DataFrame(shots.loc[:, <span class="st">'play_pattern_name'</span>].value_counts()).reset_index()</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>play_types.columns <span class="op">=</span> [<span class="st">'play_pattern_name'</span>, <span class="st">'n'</span>]</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>play_types <span class="op">=</span> play_types.sort_values(by <span class="op">=</span> <span class="st">'n'</span>, ascending <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>body_part <span class="op">=</span> pd.DataFrame(shots.loc[:, <span class="st">'body_part'</span>].value_counts()).reset_index()</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>body_part.columns <span class="op">=</span> [<span class="st">'body_part'</span>, <span class="st">'n'</span>]</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>body_part <span class="op">=</span> body_part.sort_values(by <span class="op">=</span> <span class="st">'n'</span>, ascending <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Canvas</span></span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(nrows <span class="op">=</span> <span class="dv">1</span>, ncols <span class="op">=</span> <span class="dv">2</span>, figsize <span class="op">=</span> (<span class="dv">5</span>, <span class="dv">5</span>))</span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="co"># grid specs</span></span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].grid(color <span class="op">=</span> <span class="st">'black'</span>, ls <span class="op">=</span> <span class="st">'-.'</span>, lw <span class="op">=</span> <span class="fl">0.25</span>, axis <span class="op">=</span> <span class="st">"x"</span>)</span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Main plot</span></span>
-<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>pl <span class="op">=</span> ax[<span class="dv">0</span>].barh(play_types[<span class="st">"play_pattern_name"</span>], play_types[<span class="st">"n"</span>], height <span class="op">=</span> <span class="fl">0.6</span>, label <span class="op">=</span> <span class="st">'n'</span>,</span>
-<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>       color <span class="op">=</span> <span class="st">'skyblue'</span>, edgecolor <span class="op">=</span> <span class="st">"black"</span>, zorder <span class="op">=</span> <span class="dv">2</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>) </span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Barplot labels</span></span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].bar_label(pl, padding <span class="op">=</span> <span class="dv">5</span>, label_type<span class="op">=</span><span class="st">'edge'</span>)</span>
-<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Labels and titles</span></span>
-<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_ylabel(<span class="st">"Type of Play"</span>, fontsize <span class="op">=</span> <span class="dv">10</span>)</span>
-<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_xlabel(<span class="st">"# of instances"</span>, fontsize <span class="op">=</span> <span class="dv">10</span>)</span>
-<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].tick_params(axis <span class="op">=</span> <span class="st">'both'</span>, which <span class="op">=</span> <span class="st">'major'</span>, labelsize <span class="op">=</span> <span class="dv">10</span>)</span>
-<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_title(<span class="st">""</span>, loc <span class="op">=</span> <span class="st">"left"</span>, pad <span class="op">=</span> <span class="dv">1</span>, fontdict <span class="op">=</span> font)</span>
-<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
-<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a><span class="co">#############################################################################</span></span>
-<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a><span class="co"># grid specs</span></span>
-<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].grid(color <span class="op">=</span> <span class="st">'black'</span>, ls <span class="op">=</span> <span class="st">'-.'</span>, lw <span class="op">=</span> <span class="fl">0.25</span>, axis <span class="op">=</span> <span class="st">"x"</span>)</span>
-<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Main plot</span></span>
-<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>pl2 <span class="op">=</span> ax[<span class="dv">1</span>].barh(body_part[<span class="st">"body_part"</span>], body_part[<span class="st">"n"</span>], height <span class="op">=</span> <span class="fl">0.6</span>, label <span class="op">=</span> <span class="st">'n'</span>,</span>
-<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>       color <span class="op">=</span> <span class="st">'red'</span>, edgecolor <span class="op">=</span> <span class="st">"black"</span>, zorder <span class="op">=</span> <span class="dv">2</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>) </span>
-<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Barplot labels</span></span>
-<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].bar_label(pl2, padding <span class="op">=</span> <span class="dv">5</span>, label_type<span class="op">=</span><span class="st">'edge'</span>)</span>
-<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a><span class="co"># Labels and titles</span></span>
-<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_ylabel(<span class="st">"Body part"</span>, fontsize <span class="op">=</span> <span class="dv">10</span>)</span>
-<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_xlabel(<span class="st">"# of instances"</span>, fontsize <span class="op">=</span> <span class="dv">10</span>)</span>
-<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].tick_params(axis <span class="op">=</span> <span class="st">'both'</span>, which <span class="op">=</span> <span class="st">'major'</span>, labelsize <span class="op">=</span> <span class="dv">10</span>)</span>
-<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_title(<span class="st">""</span>, loc <span class="op">=</span> <span class="st">"left"</span>, pad <span class="op">=</span> <span class="dv">1</span>, fontdict <span class="op">=</span> font)</span>
-<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
-<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a></span>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data preparation for barplot 1</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>play_types <span class="op">=</span> pd.DataFrame(shots.loc[:, <span class="st">'play_pattern_name'</span>].value_counts()).reset_index()</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>play_types.columns <span class="op">=</span> [<span class="st">'play_pattern_name'</span>, <span class="st">'n'</span>]</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>play_types <span class="op">=</span> play_types.sort_values(by <span class="op">=</span> <span class="st">'n'</span>, ascending <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Data preparation for barplot 2</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>body_part <span class="op">=</span> pd.DataFrame(shots.loc[:, <span class="st">'body_part'</span>].value_counts()).reset_index()</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>body_part.columns <span class="op">=</span> [<span class="st">'body_part'</span>, <span class="st">'n'</span>]</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>body_part <span class="op">=</span> body_part.sort_values(by <span class="op">=</span> <span class="st">'n'</span>, ascending <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Canvas</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(nrows <span class="op">=</span> <span class="dv">1</span>, ncols <span class="op">=</span> <span class="dv">2</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Grid specs</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].grid(color <span class="op">=</span> <span class="st">'black'</span>, ls <span class="op">=</span> <span class="st">'-.'</span>, lw <span class="op">=</span> <span class="fl">0.25</span>, axis <span class="op">=</span> <span class="st">"x"</span>)</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Main plot</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>pl <span class="op">=</span> ax[<span class="dv">0</span>].barh(play_types[<span class="st">"play_pattern_name"</span>], play_types[<span class="st">"n"</span>], height <span class="op">=</span> <span class="fl">0.6</span>, label <span class="op">=</span> <span class="st">'n'</span>,</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>       color <span class="op">=</span> <span class="st">'skyblue'</span>, edgecolor <span class="op">=</span> <span class="st">"black"</span>, zorder <span class="op">=</span> <span class="dv">2</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>) </span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Barplot labels</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].bar_label(pl, padding <span class="op">=</span> <span class="dv">5</span>, label_type<span class="op">=</span><span class="st">'edge'</span>)</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Labels and titles</span></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_ylabel(<span class="st">"Type of Play"</span>, fontsize <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_xlabel(<span class="st">"# of instances"</span>, fontsize <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].tick_params(axis <span class="op">=</span> <span class="st">'both'</span>, which <span class="op">=</span> <span class="st">'major'</span>, labelsize <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_title(<span class="st">""</span>, loc <span class="op">=</span> <span class="st">"left"</span>, pad <span class="op">=</span> <span class="dv">1</span>, fontdict <span class="op">=</span> font)</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a><span class="co">#############################################################################</span></span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Grid specs</span></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].grid(color <span class="op">=</span> <span class="st">'black'</span>, ls <span class="op">=</span> <span class="st">'-.'</span>, lw <span class="op">=</span> <span class="fl">0.25</span>, axis <span class="op">=</span> <span class="st">"x"</span>)</span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Main plot</span></span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>pl2 <span class="op">=</span> ax[<span class="dv">1</span>].barh(body_part[<span class="st">"body_part"</span>], body_part[<span class="st">"n"</span>], height <span class="op">=</span> <span class="fl">0.4</span>, label <span class="op">=</span> <span class="st">'n'</span>,</span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>       color <span class="op">=</span> <span class="st">'red'</span>, edgecolor <span class="op">=</span> <span class="st">"black"</span>, zorder <span class="op">=</span> <span class="dv">2</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>) </span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a><span class="co"># Barplot labels</span></span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].bar_label(pl2, padding <span class="op">=</span> <span class="dv">5</span>, label_type<span class="op">=</span><span class="st">'edge'</span>)</span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Labels and titles</span></span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_ylabel(<span class="st">"Body part"</span>, fontsize <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_xlabel(<span class="st">"# of instances"</span>, fontsize <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].tick_params(axis <span class="op">=</span> <span class="st">'both'</span>, which <span class="op">=</span> <span class="st">'major'</span>, labelsize <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_title(<span class="st">""</span>, loc <span class="op">=</span> <span class="st">"left"</span>, pad <span class="op">=</span> <span class="dv">1</span>, fontdict <span class="op">=</span> font)</span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
 <span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a><span class="co"># set the spacing between subplots</span></span>
-<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a>plt.subplots_adjust(left <span class="op">=</span> <span class="fl">0.1</span>,</span>
-<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a>                    bottom <span class="op">=</span> <span class="fl">1.3</span>, </span>
-<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a>                    right <span class="op">=</span> <span class="dv">2</span>, </span>
-<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a>                    top <span class="op">=</span> <span class="dv">2</span>, </span>
-<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a>                    wspace <span class="op">=</span> <span class="fl">0.65</span>, </span>
-<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a>                    hspace <span class="op">=</span> <span class="fl">0.5</span>)</span>
-<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-58"><a href="#cb18-58" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the spacing parameters between subplots</span></span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a>plt.subplots_adjust(left <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a>                    bottom <span class="op">=</span> <span class="fl">1.3</span>, </span>
+<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a>                    right <span class="op">=</span> <span class="dv">2</span>, </span>
+<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a>                    top <span class="op">=</span> <span class="dv">2</span>, </span>
+<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a>                    wspace <span class="op">=</span> <span class="fl">0.65</span>, </span>
+<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a>                    hspace <span class="op">=</span> <span class="fl">0.5</span>)</span>
+<span id="cb18-58"><a href="#cb18-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-59"><a href="#cb18-59" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="fig-6" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="building_model_files/figure-html/fig-6-output-1.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure 6: Distribution of shots in different types of play (left) and implemented with different parts of body (right).</figcaption><p></p>
+<p><img src="building_model_files/figure-html/fig-6-output-1.svg" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure 6: Distribution of shots in different types of play (left) and implemented with different parts of a body (right).</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -720,7 +725,7 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
 </div>
 </div>
 <p>In total, only 30 out of those 300 shots were scored.</p>
-<p>Similar pattern can be observed when analyzing <code>body_part</code> categorical column and <strong>body_part[T.Other]</strong> feature that received a high p-value in our logistic regression. Out of 11043 shots available in our dataset, only 30 shots were executed with body part other than foot or head.</p>
+<p>Similar pattern can be observed when analyzing <code>body_part</code> categorical column and <strong>body_part[T.Other]</strong> feature that received a high p-value in our logistic regression. Out of 11043 shots available in our dataset, only 30 shots were executed with a body part other than foot or head.</p>
 <div class="cell" data-execution_count="475">
 <details>
 <summary>Code</summary>
@@ -732,19 +737,19 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
 </div>
 </div>
 <p>To sum up both of these scenarios, we see that there are only 330 shots and 36 goals which fall into this outlying conditions. This is a relatively small sample size in comparison to the available data, thus, I exclude this data points from the dataset.</p>
-<div class="cell" data-execution_count="489">
+<div class="cell" data-execution_count="758">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>shots <span class="op">=</span> shots.loc[<span class="op">~</span>((shots[<span class="st">'play_pattern_name'</span>] <span class="op">==</span> <span class="st">'Other'</span>) <span class="op">|</span> (shots[<span class="st">'play_pattern_name'</span>] <span class="op">==</span> <span class="st">'From Keeper'</span> ) </span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> (shots[<span class="st">'play_pattern_name'</span>] <span class="op">==</span> <span class="st">'From Kick Off'</span>) <span class="op">|</span> (shots[<span class="st">'body_part'</span>] <span class="op">==</span> <span class="st">'Other'</span>)),  :]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>Finally, there is one more column <code>gk_loc_y</code> which also has a high p-value. This column together with <code>gk_loc_x</code> describe a location of goalkeeper during an executed shot. Naturally, goalkeeper standing on the goal line mainly can move differently but in most of the cases along the goal line. This means that her/his y coordinate should change much more frequently than x coordinate. However, what we see is that y coordinate is less significant in our model than x coordinate. As of now, I will leave both of these features in the dataset and will their impact again later when evaluating model performance with different algorithms.</p>
+<p>Finally, there is one more column <code>gk_loc_y</code> which also has a high p-value. This column together with <code>gk_loc_x</code> describe a location of opposing team’s goalkeeper during an executed shot. Naturally, a goalkeeper standing on the goal line can move differently but in most of the cases along the goal line. This means that her/his y coordinate should change much more frequently than x coordinate. However, what we see is that y coordinate is less significant in our model than x coordinate. As of now, I will leave both of these features in the dataset.</p>
 </section>
 <section id="transforming-and-splitting-data" class="level2">
 <h2 class="anchored" data-anchor-id="transforming-and-splitting-data">Transforming and Splitting Data</h2>
-<p>One-hot encoding transformation is applied to all categorical variables present in the dataset. These are <strong>body_part</strong>, <strong>technique</strong> and <strong>play_pattern_name</strong>. In addition, features <strong>distance</strong>, <strong>angle</strong>, <strong>gk_loc_x</strong> and <strong>gk_loc_y</strong> are standardized.</p>
-<div class="cell" data-execution_count="721">
+<p>One-hot encoding transformation is applied to all categorical variables present in the dataset. These are <strong>body_part</strong>, <strong>technique</strong> and <strong>play_pattern_name</strong>. Note that variables <code>under_pressure</code>, <code>follows_dribble</code>, <code>first_time</code> and <code>open_goal</code> are already transformed 0/1 boolean variables (False/True), thus, they do not need any additional preprocessing. In addition, features <strong>distance</strong>, <strong>angle</strong>, <strong>gk_loc_x</strong> and <strong>gk_loc_y</strong> are standardized.</p>
+<div class="cell" data-execution_count="759">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
@@ -754,33 +759,34 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
 <span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> shots.loc[:, <span class="st">'outcome'</span>]</span>
 <span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="co"># split data</span></span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size <span class="op">=</span> <span class="fl">0.2</span>, random_state <span class="op">=</span> <span class="dv">42</span>)</span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="co">#X_valid, X_test, y_valid, y_test = train_test_split(X_test, y_test, test_size = 0.5, random_state = 42)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size <span class="op">=</span> <span class="fl">0.2</span>, random_state <span class="op">=</span> <span class="dv">42</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>In the next section, model selection will be implemented using <code>RandomizedSearchCV</code>. Thus, our dataset is splitted into <code>X_train</code>, <code>y_train</code>, <code>X_test</code>, <code>y_test</code> where k-fold cross validation will be applied on <code>X_train</code>, <code>y_train</code> to find optimal parameters for each type of model. Finally, each model will be run on <code>X_test</code>, <code>y_test</code>.</p>
-<div class="cell" data-execution_count="722">
+<p>In the next section, model selection will be implemented using <code>RandomizedSearchCV</code>. Thus, our dataset is splitted into <code>X_train</code>, <code>y_train</code>, <code>X_test</code>, <code>y_test</code> where k-fold cross validation will be applied on <code>X_train</code>, <code>y_train</code> to find optimal parameters for each type of model. Finally, each model will be run on <code>X_test</code>, <code>y_test</code> to evaluate its performance on a new data.</p>
+<div class="cell" data-execution_count="760">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.compose <span class="im">import</span> ColumnTransformer</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> OneHotEncoder, StandardScaler</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>column_trans <span class="op">=</span> ColumnTransformer(</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    [(<span class="st">'encode_bodyparts'</span>, OneHotEncoder(dtype<span class="op">=</span><span class="st">'int'</span>), [<span class="st">'play_pattern_name'</span>, <span class="st">'technique'</span>, <span class="st">'body_part'</span>]),</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'std_coords'</span>, StandardScaler(), [<span class="st">'distance'</span>, <span class="st">'angle'</span>, <span class="st">'gk_loc_x'</span>, <span class="st">'gk_loc_y'</span>])],</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    remainder <span class="op">=</span> <span class="st">'passthrough'</span>, verbose_feature_names_out <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> column_trans.fit_transform(X_train)</span>
-<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> column_trans.transform(X_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Build a column transformer</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>column_trans <span class="op">=</span> ColumnTransformer(</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    [(<span class="st">'encode_bodyparts'</span>, OneHotEncoder(dtype<span class="op">=</span><span class="st">'int'</span>), [<span class="st">'play_pattern_name'</span>, <span class="st">'technique'</span>, <span class="st">'body_part'</span>]),</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'std_coords'</span>, StandardScaler(), [<span class="st">'distance'</span>, <span class="st">'angle'</span>, <span class="st">'gk_loc_x'</span>, <span class="st">'gk_loc_y'</span>])],</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    remainder <span class="op">=</span> <span class="st">'passthrough'</span>, verbose_feature_names_out <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Transform feature columns</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> column_trans.fit_transform(X_train)</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> column_trans.transform(X_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
-<section id="models-selection" class="level2">
-<h2 class="anchored" data-anchor-id="models-selection">Models Selection</h2>
-<p>Three different classifiers were run and evaluated on a given dataset. These are Logistic Regression, Gradient Boosting and Random Forest. Since I am interested in predictin probabilistic outputs, I prefer to use <strong>Brier score</strong> as an evaluation metric in <code>RandomizedSearchCV</code>. In addition to that, I also evaluate <strong>ROC-AUC</strong> score for each model with its best parameters.</p>
+<section id="model-selection" class="level2">
+<h2 class="anchored" data-anchor-id="model-selection">Model Selection</h2>
+<p>Three different classifiers were run and evaluated on a given dataset. These are Logistic Regression, Gradient Boosting and Random Forest. Since I am interested in predicting probabilistic outputs, the aim is achieve the highest accuracy for probability values. Thus, I use <strong>Brier score</strong> as an evaluation metric in <code>RandomizedSearchCV</code>. In addition to that, I also evaluate <strong>ROC-AUC</strong> score for each model with its best parameters. However, <strong>ROC-AUC</strong> is mainly used here as a supportive metric to illustrate relative performance in comparison to a random guess.</p>
 <section id="logistic-regression" class="level3">
 <h3 class="anchored" data-anchor-id="logistic-regression">Logistic Regression</h3>
-<div class="cell" data-execution_count="715">
+<div class="cell" data-execution_count="764">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
@@ -788,154 +794,113 @@ Name: outcome, Length: 11043, dtype: int64</code></pre>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> uniform</span>
 <span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> roc_auc_score, brier_score_loss</span>
 <span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LogisticRegression(solver <span class="op">=</span> <span class="st">'saga'</span>, max_iter <span class="op">=</span> <span class="dv">200</span>, random_state <span class="op">=</span> <span class="dv">42</span>)</span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>parameters <span class="op">=</span> <span class="bu">dict</span>(C <span class="op">=</span> uniform(loc <span class="op">=</span> <span class="dv">0</span>, scale <span class="op">=</span> <span class="dv">4</span>), </span>
-<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>                  penalty <span class="op">=</span> [<span class="st">'l2'</span>, <span class="st">'l1'</span>])</span>
-<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>classifier <span class="op">=</span> RandomizedSearchCV(model, parameters, random_state <span class="op">=</span> <span class="dv">42</span>, </span>
-<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>                                cv <span class="op">=</span> <span class="dv">10</span>, scoring <span class="op">=</span> <span class="st">'neg_brier_score'</span>)</span>
-<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>classifier.fit(X_train, y_train)</span>
-<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>classifier.best_params_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-display" data-execution_count="715">
-<pre><code>{'C': 1.49816047538945, 'penalty': 'l2'}</code></pre>
-</div>
-</div>
-<div class="cell" data-execution_count="716">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluate train data</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> classifier.predict_proba(X_train)[:, <span class="dv">1</span>]</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Train ROC-AUC = '</span>, roc_auc_score(y_train, predictions))</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Train Brier score = '</span>, brier_score_loss(y_train, predictions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Model</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LogisticRegression(solver <span class="op">=</span> <span class="st">'saga'</span>, max_iter <span class="op">=</span> <span class="dv">200</span>, random_state <span class="op">=</span> <span class="dv">42</span>)</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Hyperparameters</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>parameters <span class="op">=</span> <span class="bu">dict</span>(C <span class="op">=</span> uniform(loc <span class="op">=</span> <span class="dv">0</span>, scale <span class="op">=</span> <span class="dv">4</span>), </span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>                  penalty <span class="op">=</span> [<span class="st">'l2'</span>, <span class="st">'l1'</span>])</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Classifier</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>classifier <span class="op">=</span> RandomizedSearchCV(model, parameters, random_state <span class="op">=</span> <span class="dv">42</span>, </span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>                                cv <span class="op">=</span> <span class="dv">10</span>, scoring <span class="op">=</span> <span class="st">'neg_brier_score'</span>)</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>classifier.fit(X_train, y_train)</span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Optimal parameters are:</span><span class="ch">\n</span><span class="st">'</span>, classifier.best_params_)</span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluate on test data</span></span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> classifier.predict_proba(X_test)[:, <span class="dv">1</span>]</span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Brier score = '</span>, brier_score_loss(y_test, predictions))</span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'ROC-AUC = '</span>, roc_auc_score(y_test, predictions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Train ROC-AUC =  0.7927394065600916
-Train Brier score =  0.08145838657226699</code></pre>
-</div>
-</div>
-<div class="cell" data-execution_count="717">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluate test data</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> classifier.predict_proba(X_test)[:, <span class="dv">1</span>]</span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Test ROC-AUC = '</span>, roc_auc_score(y_test, predictions))</span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Test Brier score = '</span>, brier_score_loss(y_test, predictions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Test ROC-AUC =  0.7811086416845741
-Test Brier score =  0.0778106684846461</code></pre>
+<pre><code>Optimal parameters are:
+ {'C': 1.49816047538945, 'penalty': 'l2'}
+Brier score =  0.0778472702630083
+ROC-AUC =  0.7810976028573392</code></pre>
 </div>
 </div>
 </section>
 <section id="gradient-boosting" class="level3">
 <h3 class="anchored" data-anchor-id="gradient-boosting">Gradient Boosting</h3>
-<div class="cell" data-execution_count="718">
+<div class="cell" data-execution_count="762">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> GradientBoostingClassifier </span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> RandomizedSearchCV</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> uniform, randint</span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> roc_auc_score, brier_score_loss</span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> GradientBoostingClassifier(random_state <span class="op">=</span> <span class="dv">42</span>)</span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>parameters <span class="op">=</span> <span class="bu">dict</span>(learning_rate <span class="op">=</span> uniform(loc <span class="op">=</span> <span class="fl">0.03</span>, scale <span class="op">=</span> <span class="fl">0.035</span>),</span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>                  n_estimators <span class="op">=</span> randint(<span class="dv">100</span>, <span class="dv">800</span>),</span>
-<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>                  loss <span class="op">=</span> [<span class="st">'exponential'</span>, <span class="st">'deviance'</span>])</span>
-<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>classifier <span class="op">=</span> RandomizedSearchCV(model, parameters, random_state <span class="op">=</span> <span class="dv">42</span>, </span>
-<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>                                cv <span class="op">=</span> <span class="dv">10</span>, scoring <span class="op">=</span> <span class="st">'neg_brier_score'</span>)</span>
-<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>classifier.fit(X_train, y_train)</span>
-<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>classifier.best_params_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-display" data-execution_count="718">
-<pre><code>{'learning_rate': 0.055619787963399184,
- 'loss': 'exponential',
- 'n_estimators': 120}</code></pre>
-</div>
-</div>
-<div class="cell" data-execution_count="719">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluate train data</span></span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> classifier.predict_proba(X_train)[:, <span class="dv">1</span>]</span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Train ROC-AUC = '</span>, roc_auc_score(y_train, predictions))</span>
-<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Train Brier score = '</span>, brier_score_loss(y_train, predictions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> GradientBoostingClassifier </span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> randint</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Model</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> GradientBoostingClassifier(random_state <span class="op">=</span> <span class="dv">42</span>)</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Hyperparameters</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>parameters <span class="op">=</span> <span class="bu">dict</span>(learning_rate <span class="op">=</span> uniform(loc <span class="op">=</span> <span class="fl">0.03</span>, scale <span class="op">=</span> <span class="fl">0.035</span>),</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>                  n_estimators <span class="op">=</span> randint(<span class="dv">100</span>, <span class="dv">800</span>),</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>                  loss <span class="op">=</span> [<span class="st">'exponential'</span>, <span class="st">'deviance'</span>])</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Classifier</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>classifier <span class="op">=</span> RandomizedSearchCV(model, parameters, random_state <span class="op">=</span> <span class="dv">42</span>, </span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>                                cv <span class="op">=</span> <span class="dv">10</span>, scoring <span class="op">=</span> <span class="st">'neg_brier_score'</span>)</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>classifier.fit(X_train, y_train)</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Optimal parameters are:</span><span class="ch">\n</span><span class="st">'</span>, classifier.best_params_)</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluate on test data</span></span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> classifier.predict_proba(X_test)[:, <span class="dv">1</span>]</span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Brier score = '</span>, brier_score_loss(y_test, predictions))</span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'ROC-AUC = '</span>, roc_auc_score(y_test, predictions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Train ROC-AUC =  0.8248873662260398
-Train Brier score =  0.07651268975293543</code></pre>
-</div>
-</div>
-<div class="cell" data-execution_count="720">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluate test data</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> classifier.predict_proba(X_test)[:, <span class="dv">1</span>]</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Test ROC-AUC = '</span>, roc_auc_score(y_test, predictions))</span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Test Brier score = '</span>, brier_score_loss(y_test, predictions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Test ROC-AUC =  0.7843049954372847
-Test Brier score =  0.07763277894103415</code></pre>
+<pre><code>Optimal parameters are:
+ {'learning_rate': 0.055619787963399184, 'loss': 'exponential', 'n_estimators': 120}
+Train Brier score =  0.07629316361547901
+Test ROC-AUC =  0.7805726452954971
+Test Brier score =  0.07818749793751041</code></pre>
 </div>
 </div>
 </section>
-<section id="random-forrest" class="level3">
-<h3 class="anchored" data-anchor-id="random-forrest">Random Forrest</h3>
-<div class="cell" data-execution_count="688">
+<section id="random-forest" class="level3">
+<h3 class="anchored" data-anchor-id="random-forest">Random Forest</h3>
+<div class="cell" data-execution_count="763">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> RandomizedSearchCV</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> uniform, randint</span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> roc_auc_score, brier_score_loss</span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> RandomForestClassifier(random_state <span class="op">=</span> <span class="dv">42</span>)</span>
-<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>parameters <span class="op">=</span> <span class="bu">dict</span>(max_depth <span class="op">=</span> randint(<span class="dv">5</span>, <span class="dv">50</span>),</span>
-<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>                  criterion <span class="op">=</span> [<span class="st">'entropy'</span>, <span class="st">'gini'</span>],</span>
-<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>                  min_samples_split <span class="op">=</span> randint(<span class="dv">2</span>, <span class="dv">50</span>))</span>
-<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>classifier <span class="op">=</span> RandomizedSearchCV(model, parameters, random_state <span class="op">=</span> <span class="dv">42</span>, </span>
-<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>                                cv <span class="op">=</span> <span class="dv">10</span>, scoring <span class="op">=</span> <span class="st">'neg_brier_score'</span>)</span>
-<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>classifier.fit(X_train, y_train)</span>
-<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>classifier.best_params_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-display" data-execution_count="688">
-<pre><code>{'criterion': 'entropy', 'max_depth': 12, 'min_samples_split': 22}</code></pre>
-</div>
-</div>
-<div class="cell" data-scrolled="true" data-execution_count="689">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluate train data</span></span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> classifier.predict_proba(X_train)[:, <span class="dv">1</span>]</span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Train ROC-AUC = '</span>, roc_auc_score(y_train, predictions))</span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Train Brier score = '</span>, brier_score_loss(y_train, predictions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Model</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> RandomForestClassifier(random_state <span class="op">=</span> <span class="dv">42</span>)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Hyperparameters</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>parameters <span class="op">=</span> <span class="bu">dict</span>(max_depth <span class="op">=</span> randint(<span class="dv">5</span>, <span class="dv">50</span>),</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>                  criterion <span class="op">=</span> [<span class="st">'entropy'</span>, <span class="st">'gini'</span>],</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>                  min_samples_split <span class="op">=</span> randint(<span class="dv">2</span>, <span class="dv">50</span>))</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Classifier</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>classifier <span class="op">=</span> RandomizedSearchCV(model, parameters, random_state <span class="op">=</span> <span class="dv">42</span>, </span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>                                cv <span class="op">=</span> <span class="dv">10</span>, scoring <span class="op">=</span> <span class="st">'neg_brier_score'</span>)</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>classifier.fit(X_train, y_train)</span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Optimal parameters are:</span><span class="ch">\n</span><span class="st">'</span>, classifier.best_params_)</span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluate on test data</span></span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> classifier.predict_proba(X_test)[:, <span class="dv">1</span>]</span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Brier score = '</span>, brier_score_loss(y_test, predictions))</span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'ROC-AUC = '</span>, roc_auc_score(y_test, predictions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Train ROC-AUC =  0.909537014259732
-Train Brier score =  0.06618085461792976</code></pre>
-</div>
-</div>
-<div class="cell" data-execution_count="690">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># evaluate test data</span></span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> classifier.predict_proba(X_test)[:, <span class="dv">1</span>]</span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Test ROC-AUC = '</span>, roc_auc_score(y_test, predictions))</span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Test Brier score = '</span>, brier_score_loss(y_test, predictions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Test ROC-AUC =  0.7729558545033509
-Test Brier score =  0.07860378186146198</code></pre>
+<pre><code>Optimal parameters are:
+ {'criterion': 'entropy', 'max_depth': 12, 'min_samples_split': 22}
+Train Brier score =  0.06629541451260197
+Test ROC-AUC =  0.7761693797650938
+Test Brier score =  0.07892679615459904</code></pre>
 </div>
 </div>
 <p>To sum up, when comparing Brier scores for each of classifiers, it can be seen that Gradient Boosting by a small margin outperforms both Logistic Regression and Random Forest. In addition, Gradient Boosting also demonstrates the highest ROC-AUC value 0.784. This value is well above 0.5 which proves that the classifier performs much better than a random guess.</p>
 </section>
+</section>
+<section id="future-improvements" class="level2">
+<h2 class="anchored" data-anchor-id="future-improvements">Future Improvements</h2>
+<p>The model illustrates a decent performance. However, there are always areas for improvement that I would like to briefly outline:</p>
+<ul>
+<li>More thorough analysis of opposing team’s goalkeeper coordinates.</li>
+<li>Analyze how discarded outliers may affect model performance.</li>
+<li>Analyze correlation between features using different techniques such as point biserial correlation and chi square test of association.</li>
+<li>Use location of opposing team’s defenders to construct additional features.</li>
+</ul>
 </section>
 
 </main>
